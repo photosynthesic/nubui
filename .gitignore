@@ -1,0 +1,30 @@
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+lib/
+*.tsbuildinfo
+
+# Temporary reference code (DO NOT COMMIT)
+temp-reference/
+old-code-ref/
+reference/
+legacy/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed

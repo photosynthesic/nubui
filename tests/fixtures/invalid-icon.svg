@@ -1,0 +1,4 @@
+<!-- Invalid SVG for error testing -->
+<svg width="24" height="24" viewBox="0 0 24 24"
+  <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z"
+</svg>
