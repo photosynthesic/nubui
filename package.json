@@ -1,6 +1,6 @@
 {
   "name": "@photosynthesic/nubui",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Custom SVG icons instantly usable with Tailwind CSS. Framework-agnostic with mask/inline/img modes.",
   "main": "./lib/index.cjs",
   "module": "./lib/index.mjs",
