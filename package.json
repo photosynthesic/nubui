@@ -2,8 +2,8 @@
   "name": "@photosynthesic/nubui",
   "version": "0.1.1",
   "description": "Custom SVG icons instantly usable with Tailwind CSS. Framework-agnostic with mask/inline/img modes.",
-  "main": "./lib/index.js",
-  "module": "./lib/index.esm.js",
+  "main": "./lib/index.cjs",
+  "module": "./lib/index.mjs",
   "types": "./types/index.d.ts",
   "bin": {
     "nubui": "./bin/nubui.js"
@@ -11,22 +11,22 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "import": "./lib/index.esm.js",
-      "require": "./lib/index.js"
+      "import": "./lib/index.mjs",
+      "require": "./lib/index.cjs"
     },
     "./icon": {
-      "types": "./types/icon.d.ts",
-      "import": "./lib/icon/index.js",
-      "require": "./lib/icon/index.js"
+      "types": "./types/icon/index.d.ts",
+      "import": "./lib/icon/index.mjs",
+      "require": "./lib/icon/index.cjs"
     },
     "./button": {
-      "types": "./types/button.d.ts",
-      "import": "./lib/button/index.js",
-      "require": "./lib/button/index.js"
+      "types": "./types/button/index.d.ts",
+      "import": "./lib/button/index.mjs",
+      "require": "./lib/button/index.cjs"
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsup src/index.ts src/icon/index.ts src/button/index.ts --dts --format cjs,esm --out-dir lib",
     "icon:masks": "node bin/nubui.js icon:masks",
     "icon:preview": "node bin/nubui.js icon:preview",
     "icon:build": "node bin/nubui.js icon:build",
@@ -35,7 +35,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:ci": "vitest run --coverage --reporter=json --reporter=verbose"
+    "test:ci": "vitest run --coverage --reporter=json --reporter=verbose",
+    "test:package": "sh ./test-package.sh"
   },
   "keywords": [
     "tailwindcss",
@@ -56,6 +57,7 @@
     "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^3.2.4",
     "jsdom": "^27.0.1",
+    "tsup": "^8.5.0",
     "typescript": "^5.0.0",
     "vitest": "^3.2.4"
   },

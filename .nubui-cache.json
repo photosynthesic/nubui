@@ -1,6 +1,6 @@
 {
-  "iconDir": "./src/assets/icon",
-  "optimizedIconDir": "src/assets/icon/format",
-  "outputPath": "./src/assets/scss/_icon-masks.scss",
-  "timestamp": "2025-10-22T13:17:37.883Z"
+  "iconDir": "/var/folders/wn/2xp83mz1731_zbj6pj3_z_fc0000gn/T/nubui-test-waxnbe/icons",
+  "optimizedIconDir": "/var/folders/wn/2xp83mz1731_zbj6pj3_z_fc0000gn/T/nubui-test-waxnbe/icons/format",
+  "outputPath": "/var/folders/wn/2xp83mz1731_zbj6pj3_z_fc0000gn/T/nubui-test-waxnbe/nested/dir/_icons.scss",
+  "timestamp": "2025-10-22T13:51:16.517Z"
 }
