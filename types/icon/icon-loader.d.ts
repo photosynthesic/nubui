@@ -2,7 +2,7 @@
  * Icon loading and mapping utilities for Node.js environment
  * @fileoverview Handles SVG file loading from filesystem instead of Vite glob imports
  */
-import type { IconOutputMode } from "./types";
+import type { IconOutputMode } from "./types.js";
 /**
  * Get list of all available icon names
  * @returns {string[]} Array of available icon names

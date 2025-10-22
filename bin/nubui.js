@@ -8,6 +8,12 @@
 const { execSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
+const {
+  DEFAULT_SCSS_OUTPUT_PATH,
+  DEFAULT_PREVIEW_OUTPUT_PATH,
+  CACHE_FILE_PATH,
+  DEFAULT_OPTIMIZED_ICON_DIR,
+} = require("../lib/icon/constants.js");
 
 const COMMANDS = {
   "icon:masks": {
@@ -56,16 +62,22 @@ For command-specific help:
 `);
 }
 
-function iconClean() {
+function iconClean(args = []) {
   console.log("🧹 Cleaning generated icon files...\n");
 
   const filesToRemove = [
-    "./src/assets/css/_icon-masks.scss",
-    "./docs/icon-preview.html",
+    DEFAULT_SCSS_OUTPUT_PATH,
+    DEFAULT_PREVIEW_OUTPUT_PATH,
+    CACHE_FILE_PATH,
+  ];
+
+  const dirsToRemove = [
+    DEFAULT_OPTIMIZED_ICON_DIR,
   ];
 
   let removedCount = 0;
 
+  // Remove files
   filesToRemove.forEach((file) => {
     if (fs.existsSync(file)) {
       try {
@@ -80,19 +92,42 @@ function iconClean() {
     }
   });
 
-  console.log(`\n✨ Cleanup completed! Removed ${removedCount} file(s).\n`);
+  // Remove directories
+  dirsToRemove.forEach((dir) => {
+    if (fs.existsSync(dir)) {
+      try {
+        fs.rmSync(dir, { recursive: true, force: true });
+        console.log(`✅ Removed directory: ${dir}`);
+        removedCount++;
+      } catch (error) {
+        console.error(`❌ Failed to remove directory: ${dir}`, error.message);
+      }
+    } else {
+      console.log(`⏭️  Directory not found (skipped): ${dir}`);
+    }
+  });
+
+  console.log(`\n✨ Cleanup completed! Removed ${removedCount} item(s).\n`);
 }
 
-function iconBuild() {
+function iconBuild(args = []) {
   console.log("🚀 Building icons...\n");
+
+  // Step 0: Clean old files
+  console.log("🧹 Step 0/4: Cleaning old generated files...");
+  iconClean([]);
+  console.log("\n");
 
   const generateMasksPath = path.join(__dirname, "generate-masks.js");
   const generatePreviewPath = path.join(__dirname, "generate-preview.js");
 
+  // Pass arguments to subcommands
+  const argsString = args.join(" ");
+
   // Step 1: Generate masks
-  console.log("📝 Step 1/3: Generating icon masks...");
+  console.log("📝 Step 1/4: Generating icon masks...");
   try {
-    execSync(`node "${generateMasksPath}"`, { stdio: "inherit" });
+    execSync(`node "${generateMasksPath}" ${argsString}`, { stdio: "inherit" });
   } catch (error) {
     console.error("❌ Failed to generate masks");
     process.exit(1);
@@ -101,9 +136,9 @@ function iconBuild() {
   console.log("\n");
 
   // Step 2: Generate preview
-  console.log("📄 Step 2/3: Generating preview page...");
+  console.log("📄 Step 2/4: Generating preview page...");
   try {
-    execSync(`node "${generatePreviewPath}"`, { stdio: "inherit" });
+    execSync(`node "${generatePreviewPath}" ${argsString}`, { stdio: "inherit" });
   } catch (error) {
     console.error("❌ Failed to generate preview");
     process.exit(1);
@@ -112,8 +147,10 @@ function iconBuild() {
   console.log("\n");
 
   // Step 3: Open in browser
-  console.log("🌐 Step 3/3: Opening preview in browser...");
-  const previewPath = "docs/icon-preview.html";
+  console.log("🌐 Step 3/4: Opening preview in browser...");
+
+  // Use default preview path (generate-preview.js uses default or cache)
+  const previewPath = DEFAULT_PREVIEW_OUTPUT_PATH;
 
   try {
     // Determine OS and use appropriate command
@@ -152,11 +189,12 @@ function main() {
   }
 
   const commandConfig = COMMANDS[command];
+  const commandArgs = args.slice(1); // Get arguments after the command
 
   // Execute command
   if (commandConfig.handler) {
-    // Custom handler function
-    commandConfig.handler();
+    // Custom handler function with arguments
+    commandConfig.handler(commandArgs);
   } else if (commandConfig.script) {
     // Delegate to script
     const scriptPath = path.resolve(__dirname, "..", commandConfig.script);

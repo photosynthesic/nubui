@@ -9,6 +9,8 @@ import { type Config as OptimizeOptions } from "svgo";
 export interface MaskGeneratorConfig {
     /** Path to SVG icons directory */
     iconDir: string;
+    /** Output directory for optimized SVG files */
+    optimizedIconDir: string;
     /** Output path for generated SCSS file */
     outputPath: string;
     /** Whether to include before/after pseudo-element variants */

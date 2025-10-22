@@ -6,6 +6,10 @@
  */
 
 const { generateIconMasks } = require('../lib/icon/icon-mask-generator.js');
+const {
+    DEFAULT_ICON_SOURCE_DIR,
+    DEFAULT_SCSS_OUTPUT_PATH,
+} = require('../lib/icon/constants.js');
 
 /**
  * Parse command line arguments
@@ -72,10 +76,10 @@ USAGE:
 
 OPTIONS:
   -i, --icon-dir <path>       SVG icon directory path
-                              (default: ./src/assets/images/format/icon)
+                              (default: ${DEFAULT_ICON_SOURCE_DIR})
 
   -o, --output <path>         Output SCSS file path
-                              (default: ./src/assets/css/_icon-masks.scss)
+                              (default: ${DEFAULT_SCSS_OUTPUT_PATH})
 
   --no-pseudo                 Disable pseudo-element variants (::before, ::after)
 

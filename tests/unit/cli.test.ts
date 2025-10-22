@@ -3,6 +3,10 @@ import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
 import { execSync } from "child_process";
+import {
+  DEFAULT_ICON_SOURCE_DIR,
+  DEFAULT_SCSS_OUTPUT_PATH,
+} from "../../src/icon/constants";
 
 describe("Nubui CLI", () => {
   let tempDir: string;
@@ -13,7 +17,7 @@ describe("Nubui CLI", () => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "nubui-cli-test-"));
 
     // Create icon directory structure
-    const iconDir = path.join(tempDir, "src/assets/images/format/icon");
+    const iconDir = path.join(tempDir, DEFAULT_ICON_SOURCE_DIR);
     fs.mkdirSync(iconDir, { recursive: true });
 
     // Create test SVG files
@@ -34,7 +38,7 @@ describe("Nubui CLI", () => {
     it("should generate SCSS file", () => {
       execSync(`node "${binPath}" icon:masks`, { cwd: tempDir });
 
-      const scssPath = path.join(tempDir, "src/assets/css/_icon-masks.scss");
+      const scssPath = path.join(tempDir, DEFAULT_SCSS_OUTPUT_PATH);
       expect(fs.existsSync(scssPath)).toBe(true);
 
       const scssContent = fs.readFileSync(scssPath, "utf-8");
@@ -43,17 +47,27 @@ describe("Nubui CLI", () => {
     });
 
     it("should create output directory if it doesn't exist", () => {
-      
+
       execSync(`node "${binPath}" icon:masks`, { cwd: tempDir });
 
-      const cssDir = path.join(tempDir, "src/assets/css");
-      expect(fs.existsSync(cssDir)).toBe(true);
+      const scssDir = path.join(tempDir, path.dirname(DEFAULT_SCSS_OUTPUT_PATH));
+      expect(fs.existsSync(scssDir)).toBe(true);
     });
   });
 
   describe("icon:preview", () => {
+    it("should fail when run without icon:masks first", () => {
+      // Try to run preview without generating masks first
+      expect(() => {
+        execSync(`node "${binPath}" icon:preview`, {
+          cwd: tempDir,
+          stdio: "pipe"
+        });
+      }).toThrow();
+    });
+
     it("should generate HTML file", () => {
-      
+
 
       // First generate masks
       execSync(`node "${binPath}" icon:masks`, { cwd: tempDir });
@@ -96,13 +110,12 @@ describe("Nubui CLI", () => {
 
   describe("icon:clean", () => {
     it("should remove generated SCSS file", () => {
-      
 
       // Generate files
       execSync(`node "${binPath}" icon:masks`, { cwd: tempDir });
       execSync(`node "${binPath}" icon:preview`, { cwd: tempDir });
 
-      const scssPath = path.join(tempDir, "src/assets/css/_icon-masks.scss");
+      const scssPath = path.join(tempDir, DEFAULT_SCSS_OUTPUT_PATH);
       const htmlPath = path.join(tempDir, "docs/icon-preview.html");
 
       expect(fs.existsSync(scssPath)).toBe(true);
@@ -116,7 +129,6 @@ describe("Nubui CLI", () => {
     });
 
     it("should not error when files don't exist", () => {
-      
 
       expect(() => {
         execSync(`node "${binPath}" icon:clean`, { cwd: tempDir });
@@ -126,12 +138,10 @@ describe("Nubui CLI", () => {
 
   describe("icon:build", () => {
     it("should generate both SCSS and HTML files", () => {
-      
-
       // Run build (but don't actually open browser in test)
       execSync(`node "${binPath}" icon:build`, { cwd: tempDir });
 
-      const scssPath = path.join(tempDir, "src/assets/css/_icon-masks.scss");
+      const scssPath = path.join(tempDir, DEFAULT_SCSS_OUTPUT_PATH);
       const htmlPath = path.join(tempDir, "docs/icon-preview.html");
 
       expect(fs.existsSync(scssPath)).toBe(true);
@@ -142,6 +152,29 @@ describe("Nubui CLI", () => {
 
       const htmlContent = fs.readFileSync(htmlPath, "utf-8");
       expect(htmlContent).toContain("test-icon");
+    });
+
+    it("should pass custom icon directory option to subcommands", () => {
+      // Create a different icon directory
+      const customIconDir = path.join(tempDir, "custom-icons");
+      fs.mkdirSync(customIconDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(customIconDir, "custom-icon.svg"),
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="20" height="20"/></svg>'
+      );
+
+      // Run build with custom icon directory
+      execSync(`node "${binPath}" icon:build -i ${customIconDir}`, {
+        cwd: tempDir,
+      });
+
+      const scssPath = path.join(tempDir, DEFAULT_SCSS_OUTPUT_PATH);
+      const scssContent = fs.readFileSync(scssPath, "utf-8");
+
+      // Should contain the custom icon
+      expect(scssContent).toContain("custom-icon");
+      // Should NOT contain the default test-icon
+      expect(scssContent).not.toContain("test-icon");
     });
   });
 

@@ -7,6 +7,10 @@
 
 const fs = require("fs");
 const path = require("path");
+const {
+  DEFAULT_PREVIEW_OUTPUT_PATH,
+  CACHE_FILE_PATH,
+} = require("../lib/icon/constants.js");
 
 /**
  * Parse command line arguments
@@ -14,7 +18,7 @@ const path = require("path");
 function parseArgs() {
   const args = process.argv.slice(2);
   const result = {
-    outputPath: "docs/icon-preview.html",
+    outputPath: DEFAULT_PREVIEW_OUTPUT_PATH,
     iconDir: null,
     showHelp: false,
   };
@@ -53,15 +57,35 @@ Usage:
   npx nubui generate-preview [options]
 
 Options:
-  --output, -o <path>     Output HTML file path (default: docs/icon-preview.html)
-  --icon-dir <path>       Icon directory path (default: auto-detect)
+  --output, -o <path>     Output HTML file path (default: ${DEFAULT_PREVIEW_OUTPUT_PATH})
+  --icon-dir <path>       Icon directory path (default: read from cache)
   --help, -h              Show this help message
 
+Note:
+  This command requires 'icon:masks' to be run first to generate the cache file.
+
 Examples:
-  npx nubui generate-preview
+  npx nubui icon:masks                # First, generate masks
+  npx nubui generate-preview          # Then, generate preview
   npx nubui generate-preview --output public/preview.html
   npx nubui generate-preview --icon-dir ./custom-icons
 `);
+}
+
+/**
+ * Read cache file to get build configuration
+ */
+function readCacheFile() {
+  try {
+    if (!fs.existsSync(CACHE_FILE_PATH)) {
+      return null;
+    }
+    const cacheContent = fs.readFileSync(CACHE_FILE_PATH, "utf8");
+    return JSON.parse(cacheContent);
+  } catch (error) {
+    console.warn(`⚠️  Failed to read cache file: ${error.message}`);
+    return null;
+  }
 }
 
 /**
@@ -72,20 +96,22 @@ function getIconDirectory(customPath) {
     return customPath;
   }
 
-  const defaultDirs = [
-    "./src/assets/images/format/icon",
-    "./assets/icons",
-    "./icons",
-    "./src/icons",
-  ];
-
-  for (const dir of defaultDirs) {
-    if (fs.existsSync(dir)) {
-      return dir;
-    }
+  // Try to read from cache file first
+  const cache = readCacheFile();
+  if (cache && cache.optimizedIconDir && fs.existsSync(cache.optimizedIconDir)) {
+    return cache.optimizedIconDir;
   }
 
-  return defaultDirs[0]; // Return first default even if it doesn't exist
+  // If no cache, show error
+  if (!cache) {
+    console.error("❌ No build cache found. Please run 'npx nubui icon:masks' first.");
+    process.exit(1);
+  }
+
+  // Cache exists but directory doesn't exist
+  console.error(`❌ Optimized icon directory not found: ${cache.optimizedIconDir}`);
+  console.error("Please run 'npx nubui icon:masks' to regenerate icons.");
+  process.exit(1);
 }
 
 /**
@@ -153,19 +179,26 @@ function scssToCSS(scssContent) {
  * Load generated SCSS and convert to CSS
  */
 function loadIconCSS() {
-  const scssPaths = [
-    './src/assets/css/_icon-masks.scss',
-    './_icon-masks.scss',
-  ];
-
-  for (const scssPath of scssPaths) {
-    if (fs.existsSync(scssPath)) {
-      const scssContent = fs.readFileSync(scssPath, 'utf-8');
-      return scssToCSS(scssContent);
-    }
+  // Read SCSS path from cache
+  const cache = readCacheFile();
+  if (!cache) {
+    console.error("❌ No build cache found. Please run 'npx nubui icon:masks' first.");
+    process.exit(1);
   }
 
-  return '/* No icon masks CSS found. Run `npm run generate-masks` first. */';
+  if (!cache.outputPath) {
+    console.error("❌ Cache file is missing outputPath. Please run 'npx nubui icon:masks' again.");
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(cache.outputPath)) {
+    console.error(`❌ SCSS file not found: ${cache.outputPath}`);
+    console.error("Please run 'npx nubui icon:masks' to regenerate.");
+    process.exit(1);
+  }
+
+  const scssContent = fs.readFileSync(cache.outputPath, 'utf-8');
+  return scssToCSS(scssContent);
 }
 
 /**
