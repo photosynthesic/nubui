@@ -3,8 +3,6 @@
  * @fileoverview Main exports for the button system
  */
 
-// Main button creation function and presets
-export { createButton, buttonPresets } from "./button";
+// export { createButton, buttonPresets } from "./button";
 
-// Types
-export type { ButtonProps } from "./types";
+// export type { ButtonProps } from "./types";

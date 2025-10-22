@@ -62,7 +62,9 @@ function optimizeSvgContent(
     const result = optimize(svgContent, svgoConfig);
     return result.data;
   } catch (error) {
-    console.warn(`⚠️  SVG optimization failed, using original content: ${error}`);
+    console.warn(
+      `⚠️  SVG optimization failed, using original content: ${error}`
+    );
     return svgContent;
   }
 }
@@ -70,7 +72,11 @@ function optimizeSvgContent(
 /**
  * Convert SVG content to base64 data URL
  */
-function svgToBase64(svgContent: string, shouldOptimize: boolean = true, svgoConfig?: OptimizeOptions): string {
+function svgToBase64(
+  svgContent: string,
+  shouldOptimize: boolean = true,
+  svgoConfig?: OptimizeOptions
+): string {
   let processedSvg = svgContent;
 
   // Optimize SVG if enabled
@@ -163,10 +169,10 @@ function generateScssContent(
 
 // Base mixin for all mask icons
 @mixin mask-icon-base {
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  background-color: currentColor;
+	mask-size: contain;
+	mask-repeat: no-repeat;
+	mask-position: center;
+	background-color: currentColor;
 }
 
 // Icon data map
@@ -176,29 +182,29 @@ ${iconMapEntries}
 
 // Generate mask icon classes
 @each $name, $data in $icon-masks {
-  .mask-icon-#{$name} {
-    @include mask-icon-base;
-    mask-image: url("data:image/svg+xml;base64,#{$data}");
-  }
+	.mask-icon-#{$name} {
+		@include mask-icon-base;
+		mask-image: url("data:image/svg+xml;base64,#{$data}");
+	}
 }
 ${
   includePseudoElements
     ? `
 // Generate pseudo-element variants for flexible usage
 @each $name, $data in $icon-masks {
-  .before\\:mask-icon-#{$name}::before {
-    @include mask-icon-base;
-    mask-image: url("data:image/svg+xml;base64,#{$data}");
-    content: '';
-    display: inline-block;
-  }
+	.before\\:mask-icon-#{$name}::before {
+		@include mask-icon-base;
+		mask-image: url("data:image/svg+xml;base64,#{$data}");
+		content: '';
+		display: inline-block;
+	}
   
-  .after\\:mask-icon-#{$name}::after {
-    @include mask-icon-base;
-    mask-image: url("data:image/svg+xml;base64,#{$data}");
-    content: '';
-    display: inline-block;
-  }
+	.after\\:mask-icon-#{$name}::after {
+		@include mask-icon-base;
+		mask-image: url("data:image/svg+xml;base64,#{$data}");
+		content: '';
+		display: inline-block;
+	}
 }
 `
     : ""
@@ -278,7 +284,11 @@ function writeCacheFile(config: MaskGeneratorConfig): void {
       timestamp: new Date().toISOString(),
     };
 
-    fs.writeFileSync(CACHE_FILE_PATH, JSON.stringify(cacheData, null, 2), "utf8");
+    fs.writeFileSync(
+      CACHE_FILE_PATH,
+      JSON.stringify(cacheData, null, 2),
+      "utf8"
+    );
     console.log(`✅ Saved build configuration to ${CACHE_FILE_PATH}`);
   } catch (error) {
     console.warn(`⚠️  Failed to write cache file: ${String(error)}`);
@@ -348,3 +358,5 @@ export function generateIconMasks(
     process.exit(1);
   }
 }
+// tsup entrypoint enforcement (dummy export)
+export const __tsup_force_entry = true;

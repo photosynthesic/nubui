@@ -26,7 +26,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/icon/index.ts src/button/index.ts --dts --format cjs,esm --out-dir lib",
+    "build": "npm run clean && tsup",
     "icon:masks": "node bin/nubui.js icon:masks",
     "icon:preview": "node bin/nubui.js icon:preview",
     "icon:build": "node bin/nubui.js icon:build",
@@ -36,7 +36,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --coverage --reporter=json --reporter=verbose",
-    "test:package": "sh ./test-package.sh"
+    "test:package": "sh ./test-package.sh",
+    "clean": "rm -rf lib .nubui-cache.json"
   },
   "keywords": [
     "tailwindcss",

@@ -10,7 +10,7 @@ const path = require("path");
 const {
   DEFAULT_PREVIEW_OUTPUT_PATH,
   CACHE_FILE_PATH,
-} = require("../lib/icon/constants.js");
+} = require("../lib/icon/constants.cjs");
 
 /**
  * Parse command line arguments

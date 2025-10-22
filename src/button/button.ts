@@ -7,59 +7,42 @@ import { addClasses } from "../utils/component-utilities";
 import { createIcon } from "../icon/icon";
 import type { ButtonProps } from "./types";
 
-/**
- * Create a button element
- * @param {ButtonProps} props - Button configuration
- * @returns {HTMLElement} Configured button element
- */
-export function createButton(props: ButtonProps): HTMLElement {
-  const elementType = props.element ?? "a";
-
-  // Create the base element
-  const element = document.createElement(elementType) as HTMLElement;
-
-  // Set basic attributes based on element type
-  if (elementType === "button") {
-    const buttonElement = element as HTMLButtonElement;
-    buttonElement.type = props.htmlType ?? "button";
-  } else if (elementType === "a") {
-    const anchorElement = element as HTMLAnchorElement;
-    anchorElement.href = props.href ?? "#";
-    if (props.target) {
-      anchorElement.target = props.target;
-    }
-  }
-
-  // Set text content
-  if (props.text) {
-    // If icon is specified, create a container structure
-    if (props.icon) {
-      setupButtonWithIcon(element, props);
-    } else {
-      element.textContent = props.text;
-    }
-  }
-
-  // Handle disabled state
-  if (props.disabled) {
-    if (element instanceof HTMLButtonElement) {
-      element.disabled = true;
-    } else if (element instanceof HTMLAnchorElement) {
-      // For anchor elements, prevent default behavior and add disabled styling
-      element.setAttribute("aria-disabled", "true");
-      element.addEventListener("click", (e) => {
-        e.preventDefault();
-      });
-    }
-  }
-
-  // Add custom classes (override default styles)
-  if (props.classes && props.classes.length > 0) {
-    addClasses(element, props.classes);
-  }
-
-  return element;
-}
+// --- Button component logic is temporarily disabled during development ---
+// export function createButton(props: ButtonProps): HTMLElement {
+//   const elementType = props.element ?? "a";
+//   const element = document.createElement(elementType) as HTMLElement;
+//   if (elementType === "button") {
+//     const buttonElement = element as HTMLButtonElement;
+//     buttonElement.type = props.htmlType ?? "button";
+//   } else if (elementType === "a") {
+//     const anchorElement = element as HTMLAnchorElement;
+//     anchorElement.href = props.href ?? "#";
+//     if (props.target) {
+//       anchorElement.target = props.target;
+//     }
+//   }
+//   if (props.text) {
+//     if (props.icon) {
+//       setupButtonWithIcon(element, props);
+//     } else {
+//       element.textContent = props.text;
+//     }
+//   }
+//   if (props.disabled) {
+//     if (element instanceof HTMLButtonElement) {
+//       element.disabled = true;
+//     } else if (element instanceof HTMLAnchorElement) {
+//       element.setAttribute("aria-disabled", "true");
+//       element.addEventListener("click", (e) => {
+//         e.preventDefault();
+//       });
+//     }
+//   }
+//   if (props.classes && props.classes.length > 0) {
+//     addClasses(element, props.classes);
+//   }
+//   return element;
+// }
 
 /**
  * Setup button with icon
@@ -68,34 +51,29 @@ export function createButton(props: ButtonProps): HTMLElement {
 function setupButtonWithIcon(element: HTMLElement, props: ButtonProps): void {
   if (!props.icon || !props.text) return;
 
-  try {
-    const iconElement = createIcon({
-      iconName: props.icon,
-      mode: props.iconMode ?? "mask",
-      size: props.iconSize ?? 16,
-    });
-
-    // Create text span
-    const textSpan = document.createElement("span");
-    textSpan.textContent = props.text;
-
-    // Add elements based on icon position
-    if (props.iconPosition === "end") {
-      element.appendChild(textSpan);
-      element.appendChild(iconElement);
-    } else {
-      // Default to start position
-      element.appendChild(iconElement);
-      element.appendChild(textSpan);
-    }
-
-    // Add flex classes for proper layout
-    element.classList.add("flex", "items-center", "gap-2");
-  } catch (error) {
-    // If icon creation fails, just add text
-    console.warn(`Failed to create icon ${props.icon}:`, error);
-    element.textContent = props.text;
-  }
+  // --- Icon logic temporarily disabled during development ---
+  // try {
+  //   const iconElement = createIconElement({
+  //     iconName: props.icon,
+  //     mode: props.iconMode ?? "mask",
+  //     size: props.iconSize ?? 16,
+  //   });
+  //   const textSpan = document.createElement("span");
+  //   textSpan.textContent = props.text;
+  //   if (props.iconPosition === "end") {
+  //     element.appendChild(textSpan);
+  //     element.appendChild(iconElement);
+  //   } else {
+  //     element.appendChild(iconElement);
+  //     element.appendChild(textSpan);
+  //   }
+  //   element.classList.add("flex", "items-center", "gap-2");
+  // } catch (error) {
+  //   console.warn(`Failed to create icon ${props.icon}:`, error);
+  //   element.textContent = props.text;
+  // }
+  // --- fallback: just add text ---
+  element.textContent = props.text;
 }
 
 // Button presets
@@ -106,35 +84,9 @@ export const buttonPresets = {
     classes: [
       "px-4",
       "py-2",
-      "border",
-      "border-gray-300",
-      "rounded-md",
-      "hover:bg-gray-50",
-      "disabled:bg-gray-100",
-      "disabled:text-gray-400",
-      "disabled:cursor-not-allowed",
-      "disabled:hover:bg-gray-100",
-      "aria-disabled:bg-gray-100",
-      "aria-disabled:text-gray-400",
-      "aria-disabled:cursor-not-allowed",
-      "aria-disabled:hover:bg-gray-100",
-    ],
-    href: "#",
-  },
-
-  // Primary button
-  primary: {
-    text: "Primary",
-    type: "primary" as const,
-    classes: [
-      "bg-blue-600",
-      "text-white",
-      "border",
-      "border-blue-600",
-      "hover:bg-blue-700",
-      "px-4",
-      "py-2",
-      "rounded-md",
+      // function setupButtonWithIcon(element: HTMLElement, props: ButtonProps): void {
+      //   // ...icon logic...
+      // }
       "disabled:bg-gray-100",
       "disabled:text-gray-400",
       "disabled:border-gray-300",
@@ -277,37 +229,12 @@ export const buttonPresets = {
   },
 
   // HTML button elements
-  htmlButton: {
-    text: "HTML Button",
-    element: "button" as const,
-    classes: ["px-4", "py-2", "rounded-md", "border", "border-gray-300"],
-  },
-
-  submitButton: {
-    text: "Submit",
-    element: "button" as const,
-    htmlType: "submit" as const,
-    classes: [
-      "bg-blue-600",
-      "text-white",
-      "px-4",
-      "py-2",
-      "rounded-md",
-      "hover:bg-blue-700",
-    ],
-  },
-
-  resetButton: {
-    text: "Reset",
-    element: "button" as const,
-    htmlType: "reset" as const,
-    classes: [
-      "bg-gray-100",
-      "text-gray-700",
-      "px-4",
-      "py-2",
-      "rounded-md",
-      "hover:bg-gray-200",
-    ],
-  },
+  // export const buttonPresets = {
+  //   basic: { text: "Button", classes: [/* ... */], href: "#" },
+  //   primary: { text: "Primary", type: "primary" as const, classes: [/* ... */], href: "#" },
+  //   dashed: { text: "Dashed", type: "dashed" as const, classes: [/* ... */], href: "#" },
+  //   text: { text: "Text", type: "text" as const, classes: [/* ... */], href: "#" },
+  //   link: { text: "Link", type: "link" as const, classes: [/* ... */], href: "#" },
+  //   danger: { text: "Danger", type: "danger" as const, classes: [/* ... */] },
+  // };
 };

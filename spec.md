@@ -2,21 +2,23 @@
 
 ## 概要
 
-カスタムSVGアイコンを、Tailwind CSSで即使えるようにする開発ツール。フレームワーク非依存で、mask/inline/imgの3モードに対応。
+カスタム SVG アイコンを、Tailwind CSS で即使えるようにする開発ツール。フレームワーク非依存で、mask/inline/img の 3 モードに対応。
 
-**将来的には**、アイコンだけでなく、ボタン、インプット、モーダルなど、アクセシビリティを重視したUIコンポーネントシステムへ拡張予定。
+**将来的には**、アイコンだけでなく、ボタン、インプット、モーダルなど、アクセシビリティを重視した UI コンポーネントシステムへ拡張予定。
 
 ### このライブラリが解決する課題
 
-#### 1. **カスタムSVGアイコンの管理が面倒**
+#### 1. **カスタム SVG アイコンの管理が面倒**
 
 **実際によくあるシチュエーション:**
+
 - デザイナーが色んなところからアイコンを拾ってくる
-- プロジェクトで使うアイコンは10〜30個程度（大規模アイコンセットは不要）
-- SVGファイルをそのまま読み込むのは設定が面倒
+- プロジェクトで使うアイコンは 10〜30 個程度（大規模アイコンセットは不要）
+- SVG ファイルをそのまま読み込むのは設定が面倒
 - `<img>`タグではカラー変更ができない
 
-**nubuiの解決策:**
+**nubui の解決策:**
+
 ```bash
 # 1. デザイナーからもらったSVGを配置
 /src/assets/icon/
@@ -35,56 +37,86 @@ npx @photosynthesic/nubui icon:build
 #### 2. **フレームワーク依存からの解放**
 
 **よくある問題:**
-- 同じプロジェクトでVueとReactのページが混在
-- inline-svgなどのツールはビルド設定が複雑
+
+- 同じプロジェクトで Vue と React のページが混在
+- inline-svg などのツールはビルド設定が複雑
 - フレームワーク特化のアイコンライブラリは他で使えない
 
-**nubuiの解決策:**
-- **CSSユーティリティクラス**として生成するため、フレームワーク非依存
-- Vue、React、Svelte、ネイティブHTML全てで同じように使える
-- ビルドツール不要（生成したCSSを読み込むだけ）
+**nubui の解決策:**
 
-#### 3. **3つのモードで柔軟に対応**
+- **CSS ユーティリティクラス**として生成するため、フレームワーク非依存
+- Vue、React、Svelte、ネイティブ HTML 全てで同じように使える
+- ビルドツール不要（生成した CSS を読み込むだけ）
+
+#### 3. **3 つのモードで柔軟に対応**
 
 **mask モード（90%のケース）:**
-- Tailwindの`text-*`クラスで簡単にカラー変更
+
+- Tailwind の`text-*`クラスで簡単にカラー変更
 - 擬似要素（`::before`, `::after`）にも対応
 - 軽量・高パフォーマンス
 
 **inline モード（10%の特殊ケース）:**
-- SVG内部の要素を個別操作したい時
+
+- SVG 内部の要素を個別操作したい時
 - アニメーション・複雑なインタラクション
 - ローディングスピナーなど
 
 **img モード（10%の特殊ケース）:**
-- CMS統合やブラウザキャッシュ活用時
+
+- CMS 統合やブラウザキャッシュ活用時
 - 大きなロゴ画像など
 
 **重要なのは「選択肢がある」こと:**
+
 ```typescript
 // 基本はmaskで実装
-<span class="mask-icon-heart w-6 h-6 text-red-500"></span>
+<span class="mask-icon-heart w-6 h-6 text-red-500"></span>;
 
 // 後からアニメーションが必要になったら、モードを変えるだけ
-createIcon({ iconName: 'spinner', mode: 'inline' });
+createIcon({ iconName: "spinner", mode: "inline" });
 ```
 
 ### 既存ツールとの違い
 
-| ツール | 用途 | nubuiとの違い |
-|--------|------|--------------|
-| **react-icons** | 大規模アイコンセット | カスタムSVGに対応していない、React専用 |
-| **inline-svg** | SVGインライン化 | メンテナンス停止、ビルド設定が複雑 |
-| **daisyUI** | Tailwind UIライブラリ | アイコン管理機能がない |
-| **nubui** | カスタムSVG → Tailwind統合 | ← この領域に特化（内部でsvgo使用） |
+| ツール          | 用途                         | nubui との違い                            |
+| --------------- | ---------------------------- | ----------------------------------------- |
+| **react-icons** | 大規模アイコンセット         | カスタム SVG に対応していない、React 専用 |
+| **inline-svg**  | SVG インライン化             | メンテナンス停止、ビルド設定が複雑        |
+| **daisyUI**     | Tailwind UI ライブラリ       | アイコン管理機能がない                    |
+| **nubui**       | カスタム SVG → Tailwind 統合 | ← この領域に特化（内部で svgo 使用）      |
 
 ### 想定ユーザー
 
-- **小〜中規模プロジェクトの開発者**: 10〜50個程度のアイコンを管理
+- **小〜中規模プロジェクトの開発者**: 10〜50 個程度のアイコンを管理
 - **デザイナーと協業する開発者**: いろんなソースからアイコンが集まる
-- **複数フレームワーク利用者**: Vue/React両方のプロジェクトを持つ
-- **Tailwind CSS愛用者**: `text-*`クラスでカラー変更したい
+- **複数フレームワーク利用者**: Vue/React 両方のプロジェクトを持つ
+- **Tailwind CSS 愛用者**: `text-*`クラスでカラー変更したい
 - **シンプルさ重視の開発者**: 大規模アイコンライブラリは過剰だと感じる
+
+## アイコン API 設計方針（2025/10/22 追記）
+
+- `createIcon` は「HTML/SVG 文字列を返す」関数として設計し、Astro や SSR/ビルド時でもそのまま使えることを保証する。
+- クライアントサイドで DOM 要素が必要な場合は、`createIconElement` などのオプション API を提供する。
+- これにより、Astro/Next.js/React/Vue/静的 HTML など、あらゆる環境で「import { createIcon } from '@photosynthesic/nubui'」が“普通に”使える。
+
+### API 例
+
+```typescript
+// SSR/ビルド時・Astro/React/Vue/HTMLで共通
+const iconHtml = createIcon({ iconName: "heart", mode: "mask", ... });
+/* iconHtml: <span class="mask-icon-heart ..."></span> */
+
+// クライアントサイドでDOM要素が必要な場合
+const iconElem = createIconElement({ iconName: "heart", ... });
+/* iconElem: HTMLElement */
+```
+
+#### 注意
+
+- 既存の`document`依存 API は「クライアント専用」として明示し、SSR/ビルド時はエラーまたは null を返す。
+
+---
 
 ## パッケージ構成
 
@@ -242,23 +274,25 @@ npx nubui icon:build
 
 ### 個別コマンド詳細
 
-#### `icon:masks` - マスクCSS生成
+#### `icon:masks` - マスク CSS 生成
 
-SVGアイコンからTailwind CSS用のマスクユーティリティクラスを生成。最適化されたSVGも同時に出力。
+SVG アイコンから Tailwind CSS 用のマスクユーティリティクラスを生成。最適化された SVG も同時に出力。
 
 ```bash
 npx nubui icon:masks [options]
 ```
 
 **オプション:**
+
 - `--icon-dir, -i <path>`: SVG アイコンディレクトリパス (デフォルト: `./src/assets/icon`)
 - `--output, -o <path>`: 出力 SCSS ファイルパス (デフォルト: `./src/assets/scss/_icon-masks.scss`)
 - `--no-pseudo`: 擬似要素バリアント(`::before`, `::after`)を無効化
-- `--no-optimize`: SVG最適化（svgo）をスキップ（デフォルト: 最適化する）
-- `--svgo-config <path>`: カスタムsvgo設定ファイルパス（オプション）
+- `--no-optimize`: SVG 最適化（svgo）をスキップ（デフォルト: 最適化する）
+- `--svgo-config <path>`: カスタム svgo 設定ファイルパス（オプション）
 - `--help, -h`: ヘルプ表示
 
 **例:**
+
 ```bash
 # 基本実行
 npx nubui icon:masks
@@ -267,20 +301,22 @@ npx nubui icon:masks
 npx nubui icon:masks --icons ./assets/icons --output ./styles/_icons.scss --no-pseudo
 ```
 
-#### `icon:preview` - プレビューHTML生成
+#### `icon:preview` - プレビュー HTML 生成
 
-生成されたアイコンを視覚的に確認するためのHTMLページを生成。
+生成されたアイコンを視覚的に確認するための HTML ページを生成。
 
 ```bash
 npx nubui icon:preview [options]
 ```
 
 **オプション:**
+
 - `--output, -o <path>`: 出力 HTML ファイルパス (デフォルト: `./docs/icon-preview.html`)
 - `--icon-dir <path>`: アイコンディレクトリパス（自動検出）
 - `--help, -h`: ヘルプ表示
 
 **例:**
+
 ```bash
 # 基本実行
 npx nubui icon:preview
@@ -291,15 +327,16 @@ npx nubui icon:preview --output public/preview.html
 
 #### `icon:build` - 統合ビルド
 
-マスクCSS生成、プレビューHTML生成、ブラウザでプレビュー表示を一括実行。
+マスク CSS 生成、プレビュー HTML 生成、ブラウザでプレビュー表示を一括実行。
 
 ```bash
 npx nubui icon:build
 ```
 
 **実行内容:**
-1. `icon:masks` を実行してSCSS生成
-2. `icon:preview` を実行してHTML生成
+
+1. `icon:masks` を実行して SCSS 生成
+2. `icon:preview` を実行して HTML 生成
 3. ブラウザで `docs/icon-preview.html` を自動的に開く
 
 #### `icon:clean` - クリーンアップ
@@ -311,6 +348,7 @@ npx nubui icon:clean
 ```
 
 **削除対象:**
+
 - `./src/assets/scss/_icon-masks.scss`
 - `./docs/icon-preview.html`
 
@@ -647,12 +685,14 @@ try {
 ### 設計思想：アクセシビリティファースト
 
 **問題意識:**
+
 - 実装者が `button` と `a` タグの使い分けを理解していない
 - `<div onClick={}>` などの不適切な実装が多発
 - アクセシビリティ対応が後回しになりがち
 - 同一チーム内でボタンデザインがバラバラになる
 
 **解決アプローチ:**
+
 - 実装者が何も意識しなくても適切な HTML 要素が自動選択される
 - disabled 状態やキーボードナビゲーションが自動対応される
 - 設定ファイルベースで全体のデザイン統一が保たれる
@@ -660,7 +700,7 @@ try {
 
 ### 設定ファイルの型安全性
 
-#### TypeScript型定義
+#### TypeScript 型定義
 
 ```typescript
 // types/config.d.ts - エクスポートされる型定義
@@ -700,24 +740,24 @@ export interface IconSizes {
 
 ```typescript
 // nubui.config.ts (推奨 - 型安全版)
-import type { NubuiConfig } from '@photosynthesic/nubui/types';
+import type { NubuiConfig } from "@photosynthesic/nubui/types";
 
 export const nubuiConfig: NubuiConfig = {
   icon: {
     sizes: {
-      sm: 'w-4 h-4',
-      md: 'w-6 h-6',
-      lg: 'w-8 h-8',
+      sm: "w-4 h-4",
+      md: "w-6 h-6",
+      lg: "w-8 h-8",
       // TypeScriptにより型チェック
       // xl: 'w-10 h-10'  // OK
       // invalidKey: 123   // エラー: string型が期待される
-    }
+    },
   },
   button: {
-    basic: 'px-4 py-2 border border-gray-300...',
-    primary: 'px-4 py-2 bg-blue-600 text-white...',
+    basic: "px-4 py-2 border border-gray-300...",
+    primary: "px-4 py-2 bg-blue-600 text-white...",
     // ...型安全な設定
-  }
+  },
 };
 ```
 
@@ -729,20 +769,23 @@ export const nubuiConfig = {
   icon: {
     // アイコンサイズ設定（3つのデフォルト + 拡張可能）
     sizes: {
-      sm: 'w-4 h-4',
-      md: 'w-6 h-6',
-      lg: 'w-8 h-8',
+      sm: "w-4 h-4",
+      md: "w-6 h-6",
+      lg: "w-8 h-8",
       // 拡張例:
       // xs: 'w-3 h-3',
       // xl: 'w-10 h-10',
       // '2xl': 'w-12 h-12'
-    }
+    },
   },
   button: {
     // 基本スタイル定義（3つのデフォルト + 拡張可能）
-    basic: 'px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
-    primary: 'px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
-    danger: 'px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500',
+    basic:
+      "px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",
+    primary:
+      "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500",
+    danger:
+      "px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500",
     // 拡張例:
     // secondary: 'px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700',
     // outline: 'px-4 py-2 border-2 border-blue-600 text-blue-600 rounded-md hover:bg-blue-50',
@@ -750,66 +793,70 @@ export const nubuiConfig = {
 
     // サイズバリエーション（3つのデフォルト + 拡張可能）
     sizes: {
-      sm: 'px-2 py-1 text-sm',
-      md: 'px-4 py-2 text-base',
-      lg: 'px-6 py-3 text-lg',
+      sm: "px-2 py-1 text-sm",
+      md: "px-4 py-2 text-base",
+      lg: "px-6 py-3 text-lg",
       // 拡張例:
       // xs: 'px-1 py-0.5 text-xs',
       // xl: 'px-8 py-4 text-xl'
     },
 
     // 状態スタイル
-    disabled: 'opacity-50 cursor-not-allowed',
-    loading: 'opacity-75 cursor-wait'
-  }
+    disabled: "opacity-50 cursor-not-allowed",
+    loading: "opacity-75 cursor-wait",
+  },
 };
 ```
 
-### 基本API
+### 基本 API
 
 ```typescript
-import { createButton, createIcon, configureNubui } from '@photosynthesic/nubui';
-import { nubuiConfig } from './nubui.config.js';
+import {
+  createButton,
+  createIcon,
+  configureNubui,
+} from "@photosynthesic/nubui";
+import { nubuiConfig } from "./nubui.config.js";
 
 // 1. 設定を初期化（アプリ起動時に一度だけ）
 configureNubui(nubuiConfig);
 
 // 2. 基本使用法（設定が自動適用）
-const button = createButton({ text: 'Click me' });
+const button = createButton({ text: "Click me" });
 // → config.button.basic のスタイルが自動適用
 
-const icon = createIcon({ iconName: 'heart-line', size: 'md' });
+const icon = createIcon({ iconName: "heart-line", size: "md" });
 // → config.icon.sizes.md のサイズが自動適用
 
-const primaryButton = createButton({ text: 'Submit', type: 'primary' });
+const primaryButton = createButton({ text: "Submit", type: "primary" });
 // → config.button.primary のスタイルが自動適用
 
-const smallButton = createButton({ text: 'Small', size: 'sm' });
+const smallButton = createButton({ text: "Small", size: "sm" });
 // → config.button.basic + config.button.sizes.sm が適用
 
 // カスタム設定
 const customButton = createButton({
-  text: 'Submit Form',
-  element: 'button',        // 'button' | 'a'
-  htmlType: 'submit',       // 'button' | 'submit' | 'reset'
-  className: 'px-6 py-3 bg-green-500',
+  text: "Submit Form",
+  element: "button", // 'button' | 'a'
+  htmlType: "submit", // 'button' | 'submit' | 'reset'
+  className: "px-6 py-3 bg-green-500",
   disabled: false,
-  href: '#',               // anchor要素の場合
-  target: '_blank',        // anchor要素の場合
+  href: "#", // anchor要素の場合
+  target: "_blank", // anchor要素の場合
 
   // 拡張プロパティ（段階的拡張）
-  type: 'primary',         // 'primary' | 'dashed' | 'text' | 'link' | 'danger'
-  size: 'LG',             // 'SM' | 'MD' | 'LG'
-  shape: 'round',         // 'default' | 'circle' | 'round'
-  block: true,            // 全幅ボタン
+  type: "primary", // 'primary' | 'dashed' | 'text' | 'link' | 'danger'
+  size: "LG", // 'SM' | 'MD' | 'LG'
+  shape: "round", // 'default' | 'circle' | 'round'
+  block: true, // 全幅ボタン
 
   // アイコン統合
-  icon: 'rocket-line',
-  iconPosition: 'start',   // 'start' | 'end'
+  icon: "rocket-line",
+  iconPosition: "start", // 'start' | 'end'
   iconSize: 20,
-  iconMode: 'mask'        // 'mask' | 'inline' | 'img'
+  iconMode: "mask", // 'mask' | 'inline' | 'img'
 });
-````
+```
 
 ### 型定義
 
@@ -1634,12 +1681,12 @@ export function generatePreviewCommand(options: PreviewCliOptions): void {
 - 擬似要素バリアント生成の制御
 - 不正なパスでの適切なエラー表示
 
-#### 6. CLIコマンド体系
+#### 6. CLI コマンド体系
 
 **テスト対象:**
 
-- `icon:masks` - マスクCSS生成コマンド
-- `icon:preview` - プレビューHTML生成コマンド
+- `icon:masks` - マスク CSS 生成コマンド
+- `icon:preview` - プレビュー HTML 生成コマンド
 - `icon:build` - 統合ビルドコマンド
 - `icon:clean` - クリーンアップコマンド
 - コマンドルーティング機能
@@ -1732,7 +1779,7 @@ export function generatePreviewCommand(options: PreviewCliOptions): void {
 
 ### 概要
 
-生成されたアイコンを視覚的に確認するための開発用HTMLページ。
+生成されたアイコンを視覚的に確認するための開発用 HTML ページ。
 
 ### 目的
 
@@ -1744,12 +1791,14 @@ export function generatePreviewCommand(options: PreviewCliOptions): void {
 ### 配置場所
 
 デフォルト:
+
 ```
 docs/
 └── icon-preview.html    # アイコンプレビューページ
 ```
 
 設定で変更可能（package.json または CLI オプション）:
+
 ```json
 {
   "nubui": {
@@ -1759,6 +1808,7 @@ docs/
 ```
 
 または CLI:
+
 ```bash
 npx nubui generate-preview --output public/preview.html
 ```
@@ -1773,7 +1823,7 @@ npx nubui generate-preview --output public/preview.html
 
 #### 2. モード切り替え
 
-- mask / inline / img の3モードを切り替えて表示
+- mask / inline / img の 3 モードを切り替えて表示
 - デフォルトは mask モード
 - 各モードの違いを視覚的に確認可能
 
@@ -1806,22 +1856,22 @@ npx nubui generate-preview --output public/preview.html
 
 ```typescript
 // Inline mode
-createIcon({ iconName: 'heart', mode: 'inline', color: '#ff0000' });
+createIcon({ iconName: "heart", mode: "inline", color: "#ff0000" });
 ```
 
 ```typescript
 // IMG mode
-createIcon({ iconName: 'heart', mode: 'img', size: 24 });
+createIcon({ iconName: "heart", mode: "img", size: 24 });
 ```
 
 ### 技術要件
 
-- **依存関係なし**: スタンドアロンHTMLファイル
-- **Tailwind CSS**: CDN経由で読み込み
-- **生成されたCSS**: `_icon-masks.scss` をコンパイルして読み込み
+- **依存関係なし**: スタンドアロン HTML ファイル
+- **Tailwind CSS**: CDN 経由で読み込み
+- **生成された CSS**: `_icon-masks.scss` をコンパイルして読み込み
 - **アイコンデータ**: `getAvailableIcons()` を使用してアイコン一覧を取得
 
-### UI構成
+### UI 構成
 
 ```
 ┌─────────────────────────────────────────┐
@@ -1844,16 +1894,19 @@ createIcon({ iconName: 'heart', mode: 'img', size: 24 });
 ### 実装優先度
 
 **Phase 1（必須）:**
+
 - アイコン一覧のグリッド表示
 - mask モードの表示
-- 基本的なカラー変更（Tailwindクラス）
+- 基本的なカラー変更（Tailwind クラス）
 
 **Phase 2（追加機能）:**
+
 - inline/img モード対応
 - カラーピッカー
 - コードサンプルのコピー機能
 
 **Phase 3（将来）:**
+
 - 検索・フィルター機能
 - ダークモード対応
 - アイコンのエクスポート機能
@@ -1895,14 +1948,14 @@ npm test
 npm run build
 ```
 
-#### 3. GitHubにpush
+#### 3. GitHub に push
 
 ```bash
 git push origin main
 git push origin --tags
 ```
 
-#### 4. npmにpublish
+#### 4. npm に publish
 
 ```bash
 # 初回またはスコープ付きパッケージ
@@ -1914,17 +1967,19 @@ npm publish
 
 ### 自動リリース（将来実装予定）
 
-GitHub Actionsを使用した自動publish設定。
+GitHub Actions を使用した自動 publish 設定。
 
 #### 実装方針
 
-`.github/workflows/publish.yml` を作成し、以下のトリガーで自動publish:
+`.github/workflows/publish.yml` を作成し、以下のトリガーで自動 publish:
 
-1. **タグpush時に自動publish**
-   - `v*.*.*` 形式のタグがpushされたら自動実行
+1. **タグ push 時に自動 publish**
+
+   - `v*.*.*` 形式のタグが push されたら自動実行
    - 例: `git tag v0.2.0 && git push origin v0.2.0`
 
 2. **ワークフロー**
+
    ```
    1. テスト実行
    2. ビルド実行
@@ -1937,15 +1992,15 @@ GitHub Actionsを使用した自動publish設定。
 
 #### メリット
 
-- 手動publishの手間を削減
+- 手動 publish の手間を削減
 - リリース時のミスを防止
-- テストが通らない場合はpublishしない（品質保証）
+- テストが通らない場合は publish しない（品質保証）
 
 #### 参考資料
 
 - GitHub Actions: npm publish
 - Semantic Versioning
-- Changesets（monorepo化後）
+- Changesets（monorepo 化後）
 
 ````
 ```
