@@ -1,6 +1,0 @@
-{
-  "iconDir": "./src/assets/icon",
-  "optimizedIconDir": "src/assets/icon/format",
-  "outputPath": "./src/assets/scss/_icon-masks.scss",
-  "timestamp": "2025-10-22T15:48:43.648Z"
-}
