@@ -1861,11 +1861,90 @@ createIcon({ iconName: 'heart', mode: 'img', size: 24 });
 
 ```bash
 # アイコンを生成
-npm run generate-masks
+npm run icon:masks
 
 # プレビューページを開く
-open dev/icon-preview.html
+open docs/icon-preview.html
 ```
+
+## npm パッケージのリリース
+
+### 手動リリース（現在の方法）
+
+#### 1. バージョンアップ
+
+```bash
+# パッチバージョンアップ (0.1.0 → 0.1.1)
+npm version patch
+
+# マイナーバージョンアップ (0.1.0 → 0.2.0)
+npm version minor
+
+# メジャーバージョンアップ (0.1.0 → 1.0.0)
+npm version major
+```
+
+#### 2. ビルドとテスト
+
+```bash
+# テスト実行
+npm test
+
+# ビルド
+npm run build
+```
+
+#### 3. GitHubにpush
+
+```bash
+git push origin main
+git push origin --tags
+```
+
+#### 4. npmにpublish
+
+```bash
+# 初回またはスコープ付きパッケージ
+npm publish --access public
+
+# 2回目以降
+npm publish
+```
+
+### 自動リリース（将来実装予定）
+
+GitHub Actionsを使用した自動publish設定。
+
+#### 実装方針
+
+`.github/workflows/publish.yml` を作成し、以下のトリガーで自動publish:
+
+1. **タグpush時に自動publish**
+   - `v*.*.*` 形式のタグがpushされたら自動実行
+   - 例: `git tag v0.2.0 && git push origin v0.2.0`
+
+2. **ワークフロー**
+   ```
+   1. テスト実行
+   2. ビルド実行
+   3. npm publish実行
+   ```
+
+3. **必要な設定**
+   - GitHub Secrets に `NPM_TOKEN` を設定
+   - npm access token の取得と登録
+
+#### メリット
+
+- 手動publishの手間を削減
+- リリース時のミスを防止
+- テストが通らない場合はpublishしない（品質保証）
+
+#### 参考資料
+
+- GitHub Actions: npm publish
+- Semantic Versioning
+- Changesets（monorepo化後）
 
 ````
 ```
