@@ -5,6 +5,7 @@ node_modules/
 dist/
 lib/
 *.tsbuildinfo
+.nubui-cache.json
 
 # Temporary reference code (DO NOT COMMIT)
 temp-reference/
