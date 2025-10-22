@@ -7,11 +7,8 @@ lib/
 *.tsbuildinfo
 .nubui-cache.json
 
-# Temporary reference code (DO NOT COMMIT)
-temp-reference/
-old-code-ref/
-reference/
-legacy/
+# npm package archives
+*.tgz
 
 # IDE
 .vscode/

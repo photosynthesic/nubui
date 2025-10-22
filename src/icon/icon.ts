@@ -36,7 +36,9 @@ import {
  * });
  * ```
  */
-export function createIcon(args: IconArgs): HTMLElement {
+
+// SSR/build compatible: returns HTML/SVG string
+export function createIcon(args: IconArgs): string {
   const {
     iconName,
     mode = "mask",
@@ -44,24 +46,131 @@ export function createIcon(args: IconArgs): HTMLElement {
     color,
     attributes = {},
     styles = {},
+    alt,
   } = args;
 
-  // Validate arguments
   validateIconArgs(iconName, mode);
-
-  // Convert size to Tailwind classes
   const tailwindSizeClasses = getTailwindSizeClasses(size);
-
-  // Process styles (no size-related styles, only user-provided styles)
   const processedStyles = { ...styles };
-
-  // Get SVG content
   const svgContent = getRawSvgContent(iconName);
   if (!svgContent) {
     throw new Error(`SVG content not found for icon: ${iconName}`);
   }
 
-  // Create icon element based on mode
+  // Utility: convert HTML attributes and styles to string
+  const attrsToString = (attrs: Record<string, string>) =>
+    Object.entries(attrs)
+      .map(([k, v]) => `${k}="${v.replace(/"/g, "&quot;")}"`)
+      .join(" ");
+  const stylesToString = (styles: Record<string, string>) =>
+    Object.entries(styles).length
+      ? ` style=\"${Object.entries(styles)
+          .map(([k, v]) => `${k}:${v}`)
+          .join(";")}\"`
+      : "";
+
+  switch (mode) {
+    case "img": {
+      const svgPath = getSvgFilePath(iconName);
+      if (!svgPath) throw new Error(`SVG file not found for icon: ${iconName}`);
+      const altAttr = alt ? ` alt="${alt}"` : "";
+      const classAttr = tailwindSizeClasses.length
+        ? ` class="${tailwindSizeClasses.join(" ")}"`
+        : "";
+      return `<img src="${svgPath}"${altAttr}${classAttr}${stylesToString(
+        processedStyles
+      )}${attrsToString(attributes) ? " " + attrsToString(attributes) : ""} />`;
+    }
+    case "inline": {
+      // Add classes and attributes to SVG
+      let svg = cleanSvgContent(svgContent);
+      // Add classes
+      svg = svg.replace(
+        /<svg(\s|>)/,
+        `<svg class=\"${tailwindSizeClasses.join(" ")}${
+          color ? " text-" + color : ""
+        }\"$1`
+      );
+      // alt/title
+      if (alt) {
+        svg = svg.replace(/<svg([^>]*)>/, `<svg$1><title>${alt}</title>`);
+      }
+      // Add attributes
+      if (Object.keys(attributes).length > 0) {
+        svg = svg.replace(
+          /<svg([^>]*)>/,
+          `<svg$1 ${attrsToString(attributes)}>`
+        );
+      }
+      // Add style
+      if (Object.keys(processedStyles).length > 0) {
+        svg = svg.replace(
+          /<svg([^>]*)>/,
+          `<svg$1 style=\"${Object.entries(processedStyles)
+            .map(([k, v]) => `${k}:${v}`)
+            .join(";")}\">`
+        );
+      }
+      return svg;
+    }
+    case "mask":
+    default: {
+      // Add mask class to span
+      const classList = [
+        `mask-icon-${iconName}`,
+        "inline-block",
+        ...tailwindSizeClasses,
+      ];
+      if (color) {
+        if (color.startsWith("text-") || color.startsWith("bg-")) {
+          classList.push(
+            color.startsWith("bg-") ? color.replace("bg-", "text-") : color
+          );
+        } else {
+          classList.push(
+            color.includes("#") ||
+              color.includes("rgb") ||
+              color.includes("hsl")
+              ? `text-[${color}]`
+              : `text-${color}`
+          );
+        }
+      }
+      const altAttr = alt ? ` role="img" aria-label="${alt}"` : "";
+      return `<span class="${classList.join(" ")}"${altAttr}${stylesToString(
+        processedStyles
+      )}${
+        attrsToString(attributes) ? " " + attrsToString(attributes) : ""
+      }></span>`;
+    }
+  }
+}
+
+// Client-only: returns HTMLElement
+export function createIconElement(args: IconArgs): HTMLElement {
+  if (typeof document === "undefined") {
+    throw new Error(
+      "createIconElement is only available in the browser (document is undefined)"
+    );
+  }
+  const {
+    iconName,
+    mode = "mask",
+    size = 24,
+    color,
+    attributes = {},
+    styles = {},
+    alt,
+  } = args;
+
+  validateIconArgs(iconName, mode);
+  const tailwindSizeClasses = getTailwindSizeClasses(size);
+  const processedStyles = { ...styles };
+  const svgContent = getRawSvgContent(iconName);
+  if (!svgContent) {
+    throw new Error(`SVG content not found for icon: ${iconName}`);
+  }
+
   switch (mode) {
     case "img":
       return createImgIcon(
@@ -69,10 +178,9 @@ export function createIcon(args: IconArgs): HTMLElement {
         attributes,
         processedStyles,
         tailwindSizeClasses,
-        args.alt,
+        alt,
         size
       );
-
     case "inline":
       return createInlineIcon(
         svgContent,
@@ -80,9 +188,8 @@ export function createIcon(args: IconArgs): HTMLElement {
         attributes,
         processedStyles,
         tailwindSizeClasses,
-        args.alt
+        alt
       );
-
     case "mask":
     default:
       return createCSSBackgroundIcon(
@@ -91,7 +198,7 @@ export function createIcon(args: IconArgs): HTMLElement {
         attributes,
         processedStyles,
         size,
-        args.alt
+        alt
       );
   }
 }

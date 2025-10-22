@@ -6,8 +6,8 @@
 // Icon system
 export * from "./icon";
 
-// Button system
-export * from "./button";
+// Button system (一時停止中)
+// export * from "./button";
 
 // Utilities
 export * from "./utils";

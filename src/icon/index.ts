@@ -24,8 +24,8 @@ export {
 } from "./svg-utils";
 
 // Mask generator (CLI functionality)
-export { generateIconMasks } from "./icon-mask-generator";
-export type { MaskGeneratorConfig } from "./icon-mask-generator";
+// export { generateIconMasks } from "./icon-mask-generator";
+// export type { MaskGeneratorConfig } from "./icon-mask-generator";
 
 // Types
 export type { IconArgs, IconOutputMode } from "./types";

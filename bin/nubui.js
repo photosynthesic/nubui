@@ -13,7 +13,7 @@ const {
   DEFAULT_PREVIEW_OUTPUT_PATH,
   CACHE_FILE_PATH,
   DEFAULT_OPTIMIZED_ICON_DIR,
-} = require("../lib/icon/constants.js");
+} = require("../lib/icon/constants.cjs");
 
 const COMMANDS = {
   "icon:masks": {

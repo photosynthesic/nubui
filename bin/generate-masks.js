@@ -5,11 +5,11 @@
  * @fileoverview Command-line interface for generating icon mask utilities
  */
 
-const { generateIconMasks } = require('../lib/icon/icon-mask-generator.js');
+const { generateIconMasks } = require('../lib/icon/icon-mask-generator.cjs');
 const {
     DEFAULT_ICON_SOURCE_DIR,
     DEFAULT_SCSS_OUTPUT_PATH,
-} = require('../lib/icon/constants.js');
+} = require('../lib/icon/constants.cjs');
 
 /**
  * Parse command line arguments
