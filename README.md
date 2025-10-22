@@ -27,16 +27,23 @@ npm install @photosynthesic/nubui
 
 ```bash
 # One command to generate masks, preview, and open in browser
+# (default icon directory: ./src/assets/icon)
 npx nubui icon:build
+
+# Use custom icon directory
+npx nubui icon:build -i ./assets/icons
 ```
 
 **What it does:**
-1. Generates CSS mask utility classes like `.mask-icon-heart`
-2. Creates an interactive preview page
-3. Opens preview in your browser automatically
+1. Reads SVG icons from `./src/assets/icon` (or custom directory)
+2. Generates optimized SVG files to `./src/assets/icon/format`
+3. Generates CSS mask utility classes like `.mask-icon-heart`
+4. Creates an interactive preview page
+5. Opens preview in your browser automatically
 
 **What you get:**
-- `./src/assets/css/_icon-masks.scss` - CSS mask utilities
+- `./src/assets/icon/format/*.svg` - Optimized SVG files
+- `./src/assets/scss/_icon-masks.scss` - CSS mask utilities
 - `./docs/icon-preview.html` - Interactive preview page
 - `currentColor` support for dynamic color changes
 - `::before` and `::after` pseudo-element variants
@@ -158,7 +165,7 @@ const icon = createIcon({
   mode: "img",
   alt: "Home icon",
 });
-// Output: <img src="./src/assets/images/format/icon/home.svg"
+// Output: <img src="./src/assets/icon/format/home.svg"
 //              alt="Home icon"
 //              class="w-6 h-6" />
 ```
@@ -187,11 +194,11 @@ npx nubui --help        # Show all commands
 npx nubui icon:masks [OPTIONS]
 
 OPTIONS:
-  -i, --icons <path>      SVG icon directory path
-                          (default: ./src/assets/images/format/icon)
+  -i, --icon-dir <path>   SVG icon directory path
+                          (default: ./src/assets/icon)
 
   -o, --output <path>     Output SCSS file path
-                          (default: ./src/assets/css/_icon-masks.scss)
+                          (default: ./src/assets/scss/_icon-masks.scss)
 
   --no-pseudo             Disable pseudo-element variants (::before, ::after)
 
@@ -263,7 +270,7 @@ Stay tuned for updates!
 2. **Add SVG icons to your project**
 
    ```
-   src/assets/images/format/icon/
+   src/assets/icon/
    ├── heart.svg
    ├── star.svg
    └── home.svg
@@ -276,7 +283,8 @@ Stay tuned for updates!
    ```
 
    This will:
-   - Generate `./src/assets/css/_icon-masks.scss`
+   - Generate optimized SVGs to `./src/assets/icon/format/`
+   - Generate `./src/assets/scss/_icon-masks.scss`
    - Create `./docs/icon-preview.html`
    - Open preview in your browser
 
@@ -284,7 +292,7 @@ Stay tuned for updates!
 
    ```scss
    // main.scss
-   @import "./assets/css/_icon-masks";
+   @import "./assets/scss/_icon-masks";
    ```
 
 5. **Use in your components**

@@ -19,13 +19,13 @@
 **nubuiの解決策:**
 ```bash
 # 1. デザイナーからもらったSVGを配置
-/src/assets/images/format/icon/
+/src/assets/icon/
   ├── logo.svg
   ├── menu.svg
   └── close.svg
 
-# 2. 一発でTailwindで使えるCSSクラス生成
-npx @photosynthesic/nubui generate-masks
+# 2. 一発でTailwindで使えるCSSクラス生成（最適化SVGも自動生成）
+npx @photosynthesic/nubui icon:build
 
 # 3. HTMLで即使用（カラーも自由に変更）
 <span class="mask-icon-logo w-6 h-6 text-blue-500"></span>
@@ -228,14 +228,15 @@ npx nubui --help         # コマンド一覧表示
 npm install @photosynthesic/nubui
 
 # 2. SVGファイルを配置
-# デフォルト: ./src/assets/images/format/icon/
+# デフォルト: ./src/assets/icon/
 # 例: heart.svg, star.svg, home.svg
 
 # 3. アイコンをビルドしてブラウザでプレビュー
 npx nubui icon:build
 
 # 生成されるファイル:
-# - ./src/assets/css/_icon-masks.scss
+# - ./src/assets/icon/format/*.svg (最適化されたSVG)
+# - ./src/assets/scss/_icon-masks.scss (マスクCSS)
 # - ./docs/icon-preview.html (自動的にブラウザで開く)
 ```
 
@@ -243,15 +244,15 @@ npx nubui icon:build
 
 #### `icon:masks` - マスクCSS生成
 
-SVGアイコンからTailwind CSS用のマスクユーティリティクラスを生成。
+SVGアイコンからTailwind CSS用のマスクユーティリティクラスを生成。最適化されたSVGも同時に出力。
 
 ```bash
 npx nubui icon:masks [options]
 ```
 
 **オプション:**
-- `--icons, -i <path>`: SVG アイコンディレクトリパス (デフォルト: `./src/assets/images/format/icon`)
-- `--output, -o <path>`: 出力 SCSS ファイルパス (デフォルト: `./src/assets/css/_icon-masks.scss`)
+- `--icon-dir, -i <path>`: SVG アイコンディレクトリパス (デフォルト: `./src/assets/icon`)
+- `--output, -o <path>`: 出力 SCSS ファイルパス (デフォルト: `./src/assets/scss/_icon-masks.scss`)
 - `--no-pseudo`: 擬似要素バリアント(`::before`, `::after`)を無効化
 - `--no-optimize`: SVG最適化（svgo）をスキップ（デフォルト: 最適化する）
 - `--svgo-config <path>`: カスタムsvgo設定ファイルパス（オプション）
@@ -310,7 +311,7 @@ npx nubui icon:clean
 ```
 
 **削除対象:**
-- `./src/assets/css/_icon-masks.scss`
+- `./src/assets/scss/_icon-masks.scss`
 - `./docs/icon-preview.html`
 
 ## 2. アイコンシステム
@@ -1389,7 +1390,7 @@ npx @photosynthesic/nubui generate-preview --output ./docs/preview.html --config
 
 - `--output, -o <path>`: 出力 HTML ファイルパス (デフォルト: `./nubui-preview.html`)
 - `--config, -c <path>`: 設定ファイルパス (デフォルト: `./nubui.config.js`)
-- `--icons, -i <path>`: アイコンディレクトリパス (デフォルト: `./src/assets/images/format/icon`)
+- `--icon-dir, -i <path>`: アイコンディレクトリパス (デフォルト: `./src/assets/icon/format`)
 - `--theme <theme>`: プレビューテーマ `light` | `dark` | `auto` (デフォルト: `auto`)
 
 ### 生成される HTML ファイル構造
@@ -1495,7 +1496,7 @@ interface PreviewCliOptions {
 export function generatePreviewCommand(options: PreviewCliOptions): void {
   const config = {
     configPath: options.config || "./nubui.config.js",
-    iconDir: options.icons || "./src/assets/images/format/icon", // icons オプションを iconDir にマッピング
+    iconDir: options.iconDir || "./src/assets/icon/format", // iconDir オプション
     outputPath: options.output || "./nubui-preview.html",
     theme: options.theme || "auto",
     includeCodeSamples: options.includeCodeSamples ?? true,

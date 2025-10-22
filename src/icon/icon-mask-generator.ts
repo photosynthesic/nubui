@@ -6,6 +6,12 @@
 import * as fs from "fs";
 import * as path from "path";
 import { optimize, type Config as OptimizeOptions } from "svgo";
+import {
+  DEFAULT_ICON_SOURCE_DIR,
+  DEFAULT_OPTIMIZED_ICON_DIR,
+  DEFAULT_SCSS_OUTPUT_PATH,
+  CACHE_FILE_PATH,
+} from "./constants.js";
 
 /**
  * Configuration for icon mask generation
@@ -13,6 +19,8 @@ import { optimize, type Config as OptimizeOptions } from "svgo";
 export interface MaskGeneratorConfig {
   /** Path to SVG icons directory */
   iconDir: string;
+  /** Output directory for optimized SVG files */
+  optimizedIconDir: string;
   /** Output path for generated SCSS file */
   outputPath: string;
   /** Whether to include before/after pseudo-element variants */
@@ -27,8 +35,9 @@ export interface MaskGeneratorConfig {
  * Default configuration
  */
 const DEFAULT_CONFIG: MaskGeneratorConfig = {
-  iconDir: "./src/assets/images/format/icon",
-  outputPath: "./src/assets/css/_icon-masks.scss",
+  iconDir: DEFAULT_ICON_SOURCE_DIR,
+  optimizedIconDir: DEFAULT_OPTIMIZED_ICON_DIR,
+  outputPath: DEFAULT_SCSS_OUTPUT_PATH,
   includePseudoElements: true,
   optimizeSvg: true,
 };
@@ -39,6 +48,7 @@ const DEFAULT_CONFIG: MaskGeneratorConfig = {
 interface IconData {
   name: string;
   base64: string;
+  optimizedSvg: string;
 }
 
 /**
@@ -102,9 +112,22 @@ function loadIconData(
       const svgContent = fs.readFileSync(filePath, "utf8");
       const iconName = path.basename(file, ".svg");
 
+      // Get optimized SVG content
+      let processedSvg = svgContent;
+      if (optimizeSvg) {
+        processedSvg = optimizeSvgContent(svgContent, svgoConfig);
+      }
+
+      // Clean the SVG content
+      const cleanedSvg = processedSvg
+        .replace(/<\?xml[^>]*>/g, "")
+        .replace(/<!--[\s\S]*?-->/g, "")
+        .trim();
+
       iconData.push({
         name: iconName,
         base64: svgToBase64(svgContent, optimizeSvg, svgoConfig),
+        optimizedSvg: cleanedSvg,
       });
     }
 
@@ -219,6 +242,51 @@ function writeScssFile(content: string, outputPath: string): void {
 }
 
 /**
+ * Write optimized SVG files to format directory
+ */
+function writeOptimizedSvgs(iconData: IconData[], outputDir: string): void {
+  try {
+    // Ensure output directory exists
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    let writtenCount = 0;
+    for (const icon of iconData) {
+      const outputPath = path.join(outputDir, `${icon.name}.svg`);
+      fs.writeFileSync(outputPath, icon.optimizedSvg, "utf8");
+      writtenCount++;
+    }
+
+    console.log(`✅ Saved ${writtenCount} optimized SVG files to ${outputDir}`);
+  } catch (error) {
+    throw new Error(
+      `Failed to write optimized SVG files to ${outputDir}: ${String(error)}`
+    );
+  }
+}
+
+/**
+ * Write cache file with build configuration
+ */
+function writeCacheFile(config: MaskGeneratorConfig): void {
+  try {
+    const cacheData = {
+      iconDir: config.iconDir,
+      optimizedIconDir: config.optimizedIconDir,
+      outputPath: config.outputPath,
+      timestamp: new Date().toISOString(),
+    };
+
+    fs.writeFileSync(CACHE_FILE_PATH, JSON.stringify(cacheData, null, 2), "utf8");
+    console.log(`✅ Saved build configuration to ${CACHE_FILE_PATH}`);
+  } catch (error) {
+    console.warn(`⚠️  Failed to write cache file: ${String(error)}`);
+    // Don't fail the entire build if cache write fails
+  }
+}
+
+/**
  * Generate icon mask SCSS utilities
  */
 export function generateIconMasks(
@@ -226,9 +294,16 @@ export function generateIconMasks(
 ): void {
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
+  // If optimizedIconDir is not explicitly provided, derive it from iconDir
+  if (!config.optimizedIconDir) {
+    const baseIconDir = config.iconDir || DEFAULT_ICON_SOURCE_DIR;
+    finalConfig.optimizedIconDir = path.join(baseIconDir, "format");
+  }
+
   console.log("🚀 Starting icon mask generation...");
   console.log(`📁 Icon directory: ${finalConfig.iconDir}`);
-  console.log(`📄 Output file: ${finalConfig.outputPath}`);
+  console.log(`📁 Optimized icon output: ${finalConfig.optimizedIconDir}`);
+  console.log(`📄 SCSS output file: ${finalConfig.outputPath}`);
   console.log(
     `🔄 Pseudo-elements: ${
       finalConfig.includePseudoElements ? "enabled" : "disabled"
@@ -251,17 +326,23 @@ export function generateIconMasks(
       return;
     }
 
+    // Write optimized SVG files
+    writeOptimizedSvgs(iconData, finalConfig.optimizedIconDir);
+
     // Generate SCSS content
     const scssContent = generateScssContent(
       iconData,
       finalConfig.includePseudoElements
     );
 
-    // Write to file
+    // Write SCSS file
     writeScssFile(scssContent, finalConfig.outputPath);
 
     console.log("✨ Icon mask generation completed successfully!");
     console.log(`📊 Generated ${iconData.length} icon mask utilities`);
+
+    // Write cache file after all operations succeed
+    writeCacheFile(finalConfig);
   } catch (error) {
     console.error(`❌ Icon mask generation failed: ${String(error)}`);
     process.exit(1);

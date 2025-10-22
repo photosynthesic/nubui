@@ -5,7 +5,8 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import type { IconOutputMode } from "./types";
+import type { IconOutputMode } from "./types.js";
+import { DEFAULT_ICON_DIRECTORIES } from "./constants.js";
 
 /**
  * Cache for loaded SVG content to avoid repeated file reads
@@ -16,16 +17,6 @@ const iconCache: Record<string, string> = {};
  * Cache for available icon names
  */
 let availableIconsCache: string[] | null = null;
-
-/**
- * Default icon directories to search for SVG files
- */
-const DEFAULT_ICON_DIRECTORIES = [
-  "./src/assets/images/format/icon",
-  "./assets/icons",
-  "./icons",
-  "./src/icons",
-];
 
 /**
  * Get the icon directory path
