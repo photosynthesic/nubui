@@ -11,7 +11,7 @@ export interface IconArgs {
    * Name of the icon file (without .svg extension)
    * @example "phone-line", "rocket-line", "gift-line"
    */
-  iconName: string;
+  name: string;
 
   /**
    * Output mode for the icon rendering

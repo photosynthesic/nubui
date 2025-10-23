@@ -4,6 +4,6 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@photosynthesic/nubui": "file:.."
+    "@photosynthesic/nubui": "file:../.."
   }
 }

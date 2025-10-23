@@ -25,25 +25,25 @@ describe("Icon System - createIcon (SSR/HTML string)", () => {
   });
 
   it("should return span with mask classes by default", () => {
-    const html = createIcon({ iconName: "test-icon" });
+    const html = createIcon({ name: "test-icon" });
     expect(html).toContain('class="mask-icon-test-icon');
     expect(html).toContain("<span");
   });
 
   it("should return svg string for inline mode", () => {
-    const html = createIcon({ iconName: "test-icon", mode: "inline" });
+    const html = createIcon({ name: "test-icon", mode: "inline" });
     expect(html).toContain("<svg");
   });
 
   it("should return img string for img mode", () => {
-    const html = createIcon({ iconName: "test-icon", mode: "img" });
+    const html = createIcon({ name: "test-icon", mode: "img" });
     expect(html).toContain("<img");
     expect(html).toContain("src=");
   });
 
   it("should include custom attributes in HTML", () => {
     const html = createIcon({
-      iconName: "test-icon",
+      name: "test-icon",
       attributes: { "data-x": "y" },
     });
     expect(html).toContain('data-x="y"');
@@ -51,19 +51,19 @@ describe("Icon System - createIcon (SSR/HTML string)", () => {
 
   it("should include style attribute if styles given", () => {
     const html = createIcon({
-      iconName: "test-icon",
+      name: "test-icon",
       styles: { color: "red" },
     });
     expect(html).toContain("style=");
   });
 
   it("should include accessibility attributes if alt given", () => {
-    const html = createIcon({ iconName: "test-icon", alt: "desc" });
+    const html = createIcon({ name: "test-icon", alt: "desc" });
     expect(html).toContain('aria-label="desc"');
   });
 
   it("should throw error for non-existent icon", () => {
-    expect(() => createIcon({ iconName: "non-existent-icon" })).toThrow();
+    expect(() => createIcon({ name: "non-existent-icon" })).toThrow();
   });
 });
 
@@ -76,7 +76,7 @@ describe("Icon System - createIconElement (DOM/HTMLElement)", () => {
   beforeAll(requireDocument);
 
   function makeIcon(args) {
-    return createIconElement({ iconName: "test-icon", ...args });
+    return createIconElement({ name: "test-icon", ...args });
   }
 
   it("should create span element with mask classes", () => {
@@ -130,7 +130,7 @@ describe("Icon System - createIconElement (DOM/HTMLElement)", () => {
 
   it("should throw error for non-existent icon", () => {
     expect(() =>
-      createIconElement({ iconName: "non-existent-icon" })
+      createIconElement({ name: "non-existent-icon" })
     ).toThrow();
   });
 });

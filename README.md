@@ -76,12 +76,12 @@ npx nubui icon:masks --no-optimize
 import { createIcon } from "@photosynthesic/nubui";
 
 // Basic usage (CSS mask mode - default)
-const icon = createIcon({ iconName: "heart" });
+const icon = createIcon({ name: "heart" });
 document.body.appendChild(icon);
 
 // Customized icon
 const customIcon = createIcon({
-  iconName: "star",
+  name: "star",
   mode: "mask", // 'mask' | 'inline' | 'img'
   size: 32, // number | string
   color: "blue-500", // Tailwind color | hex | CSS color
@@ -122,7 +122,7 @@ After generating SCSS masks, use directly in HTML:
 
 ```typescript
 const icon = createIcon({
-  iconName: "star",
+  name: "star",
   mode: "mask",
   color: "yellow-500",
 });
@@ -141,7 +141,7 @@ const icon = createIcon({
 
 ```typescript
 const icon = createIcon({
-  iconName: "heart",
+  name: "heart",
   mode: "inline",
   color: "#3b82f6",
 });
@@ -161,7 +161,7 @@ const icon = createIcon({
 
 ```typescript
 const icon = createIcon({
-  iconName: "home",
+  name: "home",
   mode: "img",
   alt: "Home icon",
 });
@@ -229,7 +229,7 @@ OPTIONS:
 
 ```typescript
 interface IconArgs {
-  iconName: string;
+  name: string;
   mode?: 'mask' | 'inline' | 'img';
   size?: string | number;
   color?: string;
@@ -241,9 +241,9 @@ interface IconArgs {
 // Functions
 createIcon(args: IconArgs): HTMLElement
 getAvailableIcons(): string[]
-iconExists(iconName: string): boolean
-getRawSvgContent(iconName: string): string | null
-getSvgFilePath(iconName: string): string | null
+iconExists(name: string): boolean
+getRawSvgContent(name: string): string | null
+getSvgFilePath(name: string): string | null
 ```
 
 ## 🚧 Coming Soon
@@ -315,6 +315,126 @@ Stay tuned for updates!
 
 ## Example Projects
 
+### Astro Usage
+
+**Option 1: Using Icon Component (Recommended)**
+
+```astro
+---
+import { Icon } from '@photosynthesic/nubui/astro';
+---
+
+<!-- Mask mode (default) - supports currentColor -->
+<Icon name="heart" size={24} color="red-500" />
+
+<!-- Inline SVG mode - for animations and styling -->
+<Icon name="star" mode="inline" size={32} color="#fbbf24" />
+
+<!-- IMG mode - for caching -->
+<Icon name="home" mode="img" size={48} alt="Home icon" />
+
+<!-- With buttons -->
+<button class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded">
+  <Icon name="star" size={20} color="white" />
+  Favorite
+</button>
+```
+
+**Option 2: Direct Tailwind Classes**
+
+```astro
+---
+// No imports needed - just use the CSS classes
+---
+<button class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded">
+  <span class="mask-icon-star w-5 h-5"></span>
+  Favorite
+</button>
+
+<div class="flex gap-4">
+  <span class="mask-icon-heart w-6 h-6 text-red-500"></span>
+  <span class="mask-icon-home w-6 h-6 text-blue-500"></span>
+</div>
+```
+
+### Next.js Usage
+
+**Option 1: Direct Tailwind Usage (Recommended)**
+
+```tsx
+// app/page.tsx or pages/index.tsx
+export default function Home() {
+  return (
+    <div>
+      <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded">
+        <span className="mask-icon-star w-5 h-5"></span>
+        Favorite
+      </button>
+
+      <div className="flex gap-4">
+        <span className="mask-icon-heart w-6 h-6 text-red-500"></span>
+        <span className="mask-icon-home w-6 h-6 text-blue-500"></span>
+      </div>
+    </div>
+  );
+}
+```
+
+**Option 2: Reusable Icon Component**
+
+```tsx
+// components/Icon.tsx
+"use client"; // Only needed in App Router
+
+import { useEffect, useRef } from "react";
+import { createIcon } from "@photosynthesic/nubui";
+
+interface IconProps {
+  name: string;
+  size?: number;
+  color?: string;
+  className?: string;
+}
+
+export function Icon({ name, size = 24, color = "currentColor", className }: IconProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.innerHTML = ""; // Clear previous icon
+      const icon = createIcon({
+        name: name,
+        size,
+        color,
+      });
+      ref.current.appendChild(icon);
+    }
+  }, [name, size, color]);
+
+  return <div ref={ref} className={className} />;
+}
+
+// Usage:
+// <Icon name="heart" size={24} color="red-500" />
+```
+
+**Option 3: Server Component with Mask Classes (App Router)**
+
+```tsx
+// app/components/Icon.tsx (no "use client" needed)
+interface IconProps {
+  name: string;
+  className?: string;
+}
+
+export function Icon({ name, className = "" }: IconProps) {
+  return <span className={`mask-icon-${name} ${className}`} />;
+}
+
+// Usage:
+// <Icon name="heart" className="w-6 h-6 text-red-500" />
+```
+
 ### React Usage
 
 ```tsx
@@ -327,7 +447,7 @@ function IconComponent({ name, size = 24, color = "currentColor" }) {
   useEffect(() => {
     if (ref.current) {
       const icon = createIcon({
-        iconName: name,
+        name: name,
         size,
         color,
       });
@@ -355,7 +475,7 @@ const iconContainer = ref();
 
 onMounted(() => {
   const icon = createIcon({
-    iconName: props.name,
+    name: props.name,
     size: props.size || 24,
     color: props.color || "currentColor",
   });

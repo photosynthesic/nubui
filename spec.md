@@ -74,7 +74,7 @@ npx @photosynthesic/nubui icon:build
 <span class="mask-icon-heart w-6 h-6 text-red-500"></span>;
 
 // 後からアニメーションが必要になったら、モードを変えるだけ
-createIcon({ iconName: "spinner", mode: "inline" });
+createIcon({ name: "spinner", mode: "inline" });
 ```
 
 ### 既存ツールとの違い
@@ -104,11 +104,11 @@ createIcon({ iconName: "spinner", mode: "inline" });
 
 ```typescript
 // SSR/ビルド時・Astro/React/Vue/HTMLで共通
-const iconHtml = createIcon({ iconName: "heart", mode: "mask", ... });
+const iconHtml = createIcon({ name: "heart", mode: "mask", ... });
 /* iconHtml: <span class="mask-icon-heart ..."></span> */
 
 // クライアントサイドでDOM要素が必要な場合
-const iconElem = createIconElement({ iconName: "heart", ... });
+const iconElem = createIconElement({ name: "heart", ... });
 /* iconElem: HTMLElement */
 ```
 
@@ -360,11 +360,11 @@ npx nubui icon:clean
 import { createIcon, getAvailableIcons } from "@photosynthesic/nubui";
 
 // 基本使用法
-const icon = createIcon({ iconName: "heart-line" });
+const icon = createIcon({ name: "heart-line" });
 
 // 設定可能なオプション
 const customIcon = createIcon({
-  iconName: "rocket-line",
+  name: "rocket-line",
   mode: "mask", // 'mask' | 'inline' | 'img'
   size: "lg", // 設定キー ("sm" | "md" | "lg") または任意のTailwindクラス ("w-8 h-8")
   color: "blue-500", // Tailwind色名 | hex | CSS色
@@ -381,7 +381,7 @@ const icons = getAvailableIcons();
 
 ```typescript
 interface IconArgs {
-  iconName: string;
+  name: string;
   mode?: "mask" | "inline" | "img";
   size?: string; // 設定ファイルのサイズキー ("sm" | "md" | "lg") または任意のTailwindクラス ("w-8 h-8")
   color?: string;
@@ -399,7 +399,7 @@ type IconOutputMode = "mask" | "inline" | "img";
 
 ```typescript
 const icon = createIcon({
-  iconName: "star-line",
+  name: "star-line",
   mode: "mask",
   color: "yellow-500",
 });
@@ -417,7 +417,7 @@ const icon = createIcon({
 
 ```typescript
 const icon = createIcon({
-  iconName: "phone-line",
+  name: "phone-line",
   mode: "inline",
   color: "#3b82f6",
 });
@@ -434,7 +434,7 @@ const icon = createIcon({
 
 ```typescript
 const icon = createIcon({
-  iconName: "gift-line",
+  name: "gift-line",
   mode: "img",
   alt: "ギフトアイコン",
 });
@@ -523,7 +523,7 @@ import { createIcon } from "@photosynthesic/nubui";
 
 function MyButton() {
   const icon = createIcon({
-    iconName: "arrow-right",
+    name: "arrow-right",
     mode: "mask",
     color: "blue-500",
   });
@@ -552,7 +552,7 @@ function MyButton() {
 ```typescript
 // CMS環境ではIMGモードを使用
 const cmsIcon = createIcon({
-  iconName: "user-profile",
+  name: "user-profile",
   mode: "img",
   alt: "ユーザープロフィール",
 });
@@ -642,7 +642,7 @@ const cmsIcon = createIcon({
 ```typescript
 // アイコンが見つからない場合
 try {
-  const icon = createIcon({ iconName: "nonexistent-icon" });
+  const icon = createIcon({ name: "nonexistent-icon" });
 } catch (error) {
   console.error(error.message);
   // "Icon 'nonexistent-icon' not found. Available icons: heart-line, rocket-line, ..."
@@ -650,7 +650,7 @@ try {
 
 // 不正なモード指定
 try {
-  const icon = createIcon({ iconName: "heart-line", mode: "invalid" });
+  const icon = createIcon({ name: "heart-line", mode: "invalid" });
 } catch (error) {
   console.error(error.message);
   // "Invalid mode 'invalid'. Valid modes are: mask, inline, img"
@@ -825,7 +825,7 @@ configureNubui(nubuiConfig);
 const button = createButton({ text: "Click me" });
 // → config.button.basic のスタイルが自動適用
 
-const icon = createIcon({ iconName: "heart-line", size: "md" });
+const icon = createIcon({ name: "heart-line", size: "md" });
 // → config.icon.sizes.md のサイズが自動適用
 
 const primaryButton = createButton({ text: "Submit", type: "primary" });
@@ -1856,12 +1856,12 @@ npx nubui generate-preview --output public/preview.html
 
 ```typescript
 // Inline mode
-createIcon({ iconName: "heart", mode: "inline", color: "#ff0000" });
+createIcon({ name: "heart", mode: "inline", color: "#ff0000" });
 ```
 
 ```typescript
 // IMG mode
-createIcon({ iconName: "heart", mode: "img", size: 24 });
+createIcon({ name: "heart", mode: "img", size: 24 });
 ```
 
 ### 技術要件

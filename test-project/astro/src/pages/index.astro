@@ -1,0 +1,23 @@
+---
+import { Icon } from '@photosynthesic/nubui/astro';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>nubui Astro Icon Test</title>
+  </head>
+  <body>
+    <h1>nubui Icon Component Test</h1>
+
+    <h2>Mask Mode (default)</h2>
+    <Icon name="heart" size={24} color="red-500" />
+
+    <h2>Inline Mode</h2>
+    <Icon name="star" mode="inline" size={32} color="#fbbf24" />
+
+    <h2>IMG Mode</h2>
+    <Icon name="heart" mode="img" size={48} alt="Heart icon" />
+  </body>
+</html>

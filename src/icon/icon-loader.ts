@@ -81,7 +81,7 @@ export function getAvailableIcons(): string[] {
 
 /**
  * Check if an icon exists
- * @param {string} iconName - Name of the icon to check
+ * @param {string} name - Name of the icon to check
  * @returns {boolean} True if icon exists, false otherwise
  *
  * @example
@@ -91,14 +91,14 @@ export function getAvailableIcons(): string[] {
  * }
  * ```
  */
-export function iconExists(iconName: string): boolean {
+export function iconExists(name: string): boolean {
   const availableIcons = getAvailableIcons();
-  return availableIcons.includes(iconName);
+  return availableIcons.includes(name);
 }
 
 /**
  * Get raw SVG content for an icon
- * @param {string} iconName - Name of the icon
+ * @param {string} name - Name of the icon
  * @returns {string | null} SVG content or null if not found
  *
  * @example
@@ -109,20 +109,20 @@ export function iconExists(iconName: string): boolean {
  * }
  * ```
  */
-export function getRawSvgContent(iconName: string): string | null {
+export function getRawSvgContent(name: string): string | null {
   // Check cache first
-  if (iconCache[iconName]) {
-    return iconCache[iconName];
+  if (iconCache[name]) {
+    return iconCache[name];
   }
 
   const iconDir = getIconDirectory();
-  const svgPath = path.join(iconDir, `${iconName}.svg`);
+  const svgPath = path.join(iconDir, `${name}.svg`);
 
   try {
     if (fs.existsSync(svgPath)) {
       const content = fs.readFileSync(svgPath, "utf-8");
       // Cache the content
-      iconCache[iconName] = content;
+      iconCache[name] = content;
       return content;
     }
   } catch (error) {
@@ -134,7 +134,7 @@ export function getRawSvgContent(iconName: string): string | null {
 
 /**
  * Get SVG file path for an icon (for img src)
- * @param {string} iconName - Name of the icon
+ * @param {string} name - Name of the icon
  * @returns {string | null} SVG file path or null if not found
  *
  * @example
@@ -145,9 +145,9 @@ export function getRawSvgContent(iconName: string): string | null {
  * }
  * ```
  */
-export function getSvgFilePath(iconName: string): string | null {
+export function getSvgFilePath(name: string): string | null {
   const iconDir = getIconDirectory();
-  const svgPath = path.join(iconDir, `${iconName}.svg`);
+  const svgPath = path.join(iconDir, `${name}.svg`);
 
   if (fs.existsSync(svgPath)) {
     // Return relative path for web usage
@@ -160,7 +160,7 @@ export function getSvgFilePath(iconName: string): string | null {
 
 /**
  * Validate icon arguments and provide detailed error messages
- * @param {string} iconName - Name of the icon
+ * @param {string} name - Name of the icon
  * @param {IconOutputMode} mode - Output mode
  * @throws {Error} If arguments are invalid
  *
@@ -173,18 +173,18 @@ export function getSvgFilePath(iconName: string): string | null {
  * }
  * ```
  */
-export function validateIconArgs(iconName: string, mode: IconOutputMode): void {
+export function validateIconArgs(name: string, mode: IconOutputMode): void {
   // Validate icon name
-  if (!iconName || typeof iconName !== "string") {
+  if (!name || typeof name !== "string") {
     throw new Error("Icon name must be a non-empty string");
   }
 
   // Check if icon exists
-  if (!iconExists(iconName)) {
+  if (!iconExists(name)) {
     const availableIcons = getAvailableIcons();
     const iconDir = getIconDirectory();
     throw new Error(
-      `Icon "${iconName}" not found in directory "${iconDir}". Available icons: ${availableIcons.join(
+      `Icon "${name}" not found in directory "${iconDir}". Available icons: ${availableIcons.join(
         ", "
       )}`
     );
