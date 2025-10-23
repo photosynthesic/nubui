@@ -1,0 +1,16 @@
+{
+  "name": "nubui-astro-test",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build"
+  },
+  "dependencies": {
+    "@photosynthesic/nubui": "file:../.."
+  },
+  "devDependencies": {
+    "astro": "^4.0.0"
+  }
+}

@@ -116,7 +116,7 @@ function loadIconData(
     for (const file of svgFiles) {
       const filePath = path.join(iconDir, file);
       const svgContent = fs.readFileSync(filePath, "utf8");
-      const iconName = path.basename(file, ".svg");
+      const name = path.basename(file, ".svg");
 
       // Get optimized SVG content
       let processedSvg = svgContent;
@@ -131,7 +131,7 @@ function loadIconData(
         .trim();
 
       iconData.push({
-        name: iconName,
+        name: name,
         base64: svgToBase64(svgContent, optimizeSvg, svgoConfig),
         optimizedSvg: cleanedSvg,
       });

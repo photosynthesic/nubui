@@ -1,0 +1,11 @@
+---
+import { createIcon, type IconArgs } from '../../icon/index.js';
+
+type Props = IconArgs;
+
+const props = Astro.props;
+
+const html = createIcon(props);
+---
+
+<Fragment set:html={html} />

@@ -54,7 +54,7 @@ function setupButtonWithIcon(element: HTMLElement, props: ButtonProps): void {
   // --- Icon logic temporarily disabled during development ---
   // try {
   //   const iconElement = createIconElement({
-  //     iconName: props.icon,
+  //     name: props.icon,
   //     mode: props.iconMode ?? "mask",
   //     size: props.iconSize ?? 16,
   //   });

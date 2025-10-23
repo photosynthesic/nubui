@@ -23,7 +23,8 @@
       "types": "./types/button/index.d.ts",
       "import": "./lib/button/index.mjs",
       "require": "./lib/button/index.cjs"
-    }
+    },
+    "./astro": "./src/frameworks/astro/index.mjs"
   },
   "scripts": {
     "build": "npm run clean && tsup",
@@ -66,6 +67,7 @@
     "lib/**/*",
     "types/**/*",
     "bin/**/*",
+    "src/frameworks/**/*",
     "README.md"
   ],
   "engines": {

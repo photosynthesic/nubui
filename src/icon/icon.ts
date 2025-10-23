@@ -22,7 +22,7 @@ import {
  * @example
  * Basic usage (CSS mask mode - default):
  * ```typescript
- * const icon = createIcon({ iconName: 'phone-line' });
+ * const icon = createIcon({ name: 'phone-line' });
  * document.body.appendChild(icon);
  * ```
  *
@@ -30,7 +30,7 @@ import {
  * Colored icon with custom size:
  * ```typescript
  * const icon = createIcon({
- *   iconName: 'rocket-line',
+ *   name: 'rocket-line',
  *   color: '#3b82f6',
  *   size: 32
  * });
@@ -40,7 +40,7 @@ import {
 // SSR/build compatible: returns HTML/SVG string
 export function createIcon(args: IconArgs): string {
   const {
-    iconName,
+    name,
     mode = "mask",
     size = 24,
     color,
@@ -49,12 +49,12 @@ export function createIcon(args: IconArgs): string {
     alt,
   } = args;
 
-  validateIconArgs(iconName, mode);
+  validateIconArgs(name, mode);
   const tailwindSizeClasses = getTailwindSizeClasses(size);
   const processedStyles = { ...styles };
-  const svgContent = getRawSvgContent(iconName);
+  const svgContent = getRawSvgContent(name);
   if (!svgContent) {
-    throw new Error(`SVG content not found for icon: ${iconName}`);
+    throw new Error(`SVG content not found for icon: ${name}`);
   }
 
   // Utility: convert HTML attributes and styles to string
@@ -71,8 +71,8 @@ export function createIcon(args: IconArgs): string {
 
   switch (mode) {
     case "img": {
-      const svgPath = getSvgFilePath(iconName);
-      if (!svgPath) throw new Error(`SVG file not found for icon: ${iconName}`);
+      const svgPath = getSvgFilePath(name);
+      if (!svgPath) throw new Error(`SVG file not found for icon: ${name}`);
       const altAttr = alt ? ` alt="${alt}"` : "";
       const classAttr = tailwindSizeClasses.length
         ? ` class="${tailwindSizeClasses.join(" ")}"`
@@ -117,7 +117,7 @@ export function createIcon(args: IconArgs): string {
     default: {
       // Add mask class to span
       const classList = [
-        `mask-icon-${iconName}`,
+        `mask-icon-${name}`,
         "inline-block",
         ...tailwindSizeClasses,
       ];
@@ -154,7 +154,7 @@ export function createIconElement(args: IconArgs): HTMLElement {
     );
   }
   const {
-    iconName,
+    name,
     mode = "mask",
     size = 24,
     color,
@@ -163,18 +163,18 @@ export function createIconElement(args: IconArgs): HTMLElement {
     alt,
   } = args;
 
-  validateIconArgs(iconName, mode);
+  validateIconArgs(name, mode);
   const tailwindSizeClasses = getTailwindSizeClasses(size);
   const processedStyles = { ...styles };
-  const svgContent = getRawSvgContent(iconName);
+  const svgContent = getRawSvgContent(name);
   if (!svgContent) {
-    throw new Error(`SVG content not found for icon: ${iconName}`);
+    throw new Error(`SVG content not found for icon: ${name}`);
   }
 
   switch (mode) {
     case "img":
       return createImgIcon(
-        iconName,
+        name,
         attributes,
         processedStyles,
         tailwindSizeClasses,
@@ -193,7 +193,7 @@ export function createIconElement(args: IconArgs): HTMLElement {
     case "mask":
     default:
       return createCSSBackgroundIcon(
-        iconName,
+        name,
         color,
         attributes,
         processedStyles,
@@ -208,7 +208,7 @@ export function createIconElement(args: IconArgs): HTMLElement {
  * @private
  */
 function createImgIcon(
-  iconName: string,
+  name: string,
   attributes: Record<string, string>,
   styles: Record<string, string>,
   tailwindSizeClasses: string[],
@@ -219,11 +219,11 @@ function createImgIcon(
   const img = document.createElement("img");
 
   // Get SVG file path and set as src
-  const svgPath = getSvgFilePath(iconName);
+  const svgPath = getSvgFilePath(name);
   if (svgPath) {
     img.src = svgPath;
   } else {
-    throw new Error(`SVG file not found for icon: ${iconName}`);
+    throw new Error(`SVG file not found for icon: ${name}`);
   }
 
   // Set alt attribute for accessibility
@@ -411,7 +411,7 @@ function getTailwindSizeClasses(size?: string | number): string[] {
  * @private
  */
 function createCSSBackgroundIcon(
-  iconName: string,
+  name: string,
   color: string | undefined,
   attributes: Record<string, string>,
   styles: Record<string, string>,
@@ -422,7 +422,7 @@ function createCSSBackgroundIcon(
   const span = document.createElement("span");
 
   // Set the mask utility class and display
-  span.classList.add(`mask-icon-${iconName}`, "inline-block");
+  span.classList.add(`mask-icon-${name}`, "inline-block");
 
   // Check if we can use Tailwind size classes
   const tailwindSizes = size ? getTailwindSizeClasses(size) : [];
