@@ -1,11 +1,18 @@
 ---
-import { createIcon, type IconArgs } from '../../icon/index.js';
+import { createIcon, type IconArgs, loadNubuiConfig, type NubuiConfig } from '@photosynthesic/nubui';
 
-type Props = IconArgs;
+interface Props extends IconArgs {
+  config?: NubuiConfig;
+}
 
-const props = Astro.props;
+const { config, ...iconProps } = Astro.props as Props;
 
-const html = createIcon(props);
+// Load config if provided
+if (config) {
+  loadNubuiConfig(config);
+}
+
+const html = createIcon(iconProps);
 ---
 
 <Fragment set:html={html} />

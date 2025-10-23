@@ -33,7 +33,7 @@
     "icon:build": "node bin/nubui.js icon:build",
     "icon:clean": "node bin/nubui.js icon:clean",
     "prepublishOnly": "npm run build",
-    "test": "vitest run",
+    "test": "vitest run && npm run test:package",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --coverage --reporter=json --reporter=verbose",

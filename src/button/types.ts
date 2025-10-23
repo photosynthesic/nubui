@@ -17,12 +17,15 @@ export interface ButtonProps {
   htmlType?: "button" | "submit" | "reset";
   href?: string;
   target?: string;
+  rel?: string; // rel attribute for anchor elements
   disabled?: boolean;
+  autoSecurity?: boolean; // auto-add rel="noopener noreferrer" for target="_blank" (default: true)
 
   // Extensible properties (progressive enhancement)
-  type?: "primary" | "dashed" | "text" | "link" | "danger";
-  size?: "SM" | "MD" | "LG";
-  shape?: "default" | "circle" | "round";
+  // Note: These accept string to support custom config-based values
+  type?: string; // "primary" | "dashed" | "text" | "link" | "danger" | custom
+  size?: string; // "SM" | "MD" | "LG" | custom
+  shape?: string; // "default" | "circle" | "round" | custom
   block?: boolean;
 
   // Icon integration

@@ -11,6 +11,7 @@ import {
   getRawSvgContent,
   getSvgFilePath,
 } from "./icon-loader";
+import { getIconConfig } from "./config.js";
 
 /**
  * Create an icon element with specified options
@@ -42,15 +43,21 @@ export function createIcon(args: IconArgs): string {
   const {
     name,
     mode = "mask",
-    size = 24,
+    size,
     color,
     attributes = {},
     styles = {},
     alt,
   } = args;
 
+  // Use config's defaultSize if size is not provided
+  const config = getIconConfig();
+  const resolvedSize = size !== undefined ? size : config.defaultSize;
+  // Use config's defaultColor if color is not provided
+  const resolvedColor = color !== undefined ? color : config.defaultColor;
+
   validateIconArgs(name, mode);
-  const tailwindSizeClasses = getTailwindSizeClasses(size);
+  const tailwindSizeClasses = getTailwindSizeClasses(resolvedSize);
   const processedStyles = { ...styles };
   const svgContent = getRawSvgContent(name);
   if (!svgContent) {
@@ -88,7 +95,7 @@ export function createIcon(args: IconArgs): string {
       svg = svg.replace(
         /<svg(\s|>)/,
         `<svg class=\"${tailwindSizeClasses.join(" ")}${
-          color ? " text-" + color : ""
+          resolvedColor && resolvedColor !== "currentColor" ? " text-" + resolvedColor : ""
         }\"$1`
       );
       // alt/title
@@ -121,18 +128,18 @@ export function createIcon(args: IconArgs): string {
         "inline-block",
         ...tailwindSizeClasses,
       ];
-      if (color) {
-        if (color.startsWith("text-") || color.startsWith("bg-")) {
+      if (resolvedColor && resolvedColor !== "currentColor") {
+        if (resolvedColor.startsWith("text-") || resolvedColor.startsWith("bg-")) {
           classList.push(
-            color.startsWith("bg-") ? color.replace("bg-", "text-") : color
+            resolvedColor.startsWith("bg-") ? resolvedColor.replace("bg-", "text-") : resolvedColor
           );
         } else {
           classList.push(
-            color.includes("#") ||
-              color.includes("rgb") ||
-              color.includes("hsl")
-              ? `text-[${color}]`
-              : `text-${color}`
+            resolvedColor.includes("#") ||
+              resolvedColor.includes("rgb") ||
+              resolvedColor.includes("hsl")
+              ? `text-[${resolvedColor}]`
+              : `text-${resolvedColor}`
           );
         }
       }
@@ -156,15 +163,21 @@ export function createIconElement(args: IconArgs): HTMLElement {
   const {
     name,
     mode = "mask",
-    size = 24,
+    size,
     color,
     attributes = {},
     styles = {},
     alt,
   } = args;
 
+  // Use config's defaultSize if size is not provided
+  const config = getIconConfig();
+  const resolvedSize = size !== undefined ? size : config.defaultSize;
+  // Use config's defaultColor if color is not provided
+  const resolvedColor = color !== undefined ? color : config.defaultColor;
+
   validateIconArgs(name, mode);
-  const tailwindSizeClasses = getTailwindSizeClasses(size);
+  const tailwindSizeClasses = getTailwindSizeClasses(resolvedSize);
   const processedStyles = { ...styles };
   const svgContent = getRawSvgContent(name);
   if (!svgContent) {
@@ -179,12 +192,12 @@ export function createIconElement(args: IconArgs): HTMLElement {
         processedStyles,
         tailwindSizeClasses,
         alt,
-        size
+        resolvedSize
       );
     case "inline":
       return createInlineIcon(
         svgContent,
-        color,
+        resolvedColor,
         attributes,
         processedStyles,
         tailwindSizeClasses,
@@ -194,10 +207,10 @@ export function createIconElement(args: IconArgs): HTMLElement {
     default:
       return createCSSBackgroundIcon(
         name,
-        color,
+        resolvedColor,
         attributes,
         processedStyles,
-        size,
+        resolvedSize,
         alt
       );
   }
@@ -354,7 +367,19 @@ function createInlineIcon(
  * @private
  */
 function getTailwindSizeClasses(size?: string | number): string[] {
-  if (!size) return ["w-6", "h-6"]; // Default 24px
+  // Get configured size map from config
+  const config = getIconConfig();
+  const configuredSizeMap = config.sizeMap || {};
+
+  // Determine default size
+  const defaultSizeStr = typeof config.defaultSize === "number"
+    ? `${config.defaultSize}px`
+    : (config.defaultSize || "24px");
+
+  if (!size) {
+    // Return default size classes
+    return (configuredSizeMap[defaultSizeStr] || "w-6 h-6").split(" ");
+  }
 
   // Normalize size to string with px unit
   let sizeStr: string;
@@ -363,28 +388,12 @@ function getTailwindSizeClasses(size?: string | number): string[] {
   } else if (typeof size === "string") {
     sizeStr = size;
   } else {
-    return ["w-6", "h-6"];
+    return (configuredSizeMap[defaultSizeStr] || "w-6 h-6").split(" ");
   }
 
-  // Standard Tailwind size mappings
-  const sizeMap: Record<string, string> = {
-    "16px": "w-4 h-4",
-    "20px": "w-5 h-5",
-    "24px": "w-6 h-6",
-    "28px": "w-7 h-7",
-    "32px": "w-8 h-8",
-    "36px": "w-9 h-9",
-    "40px": "w-10 h-10",
-    "44px": "w-11 h-11",
-    "48px": "w-12 h-12",
-    "56px": "w-14 h-14",
-    "60px": "w-15 h-15",
-    "64px": "w-16 h-16",
-  };
-
-  // Use standard mapping if available
-  if (sizeMap[sizeStr]) {
-    return sizeMap[sizeStr].split(" ");
+  // Use configured mapping if available
+  if (configuredSizeMap[sizeStr]) {
+    return configuredSizeMap[sizeStr].split(" ");
   }
 
   // For non-standard sizes, use Tailwind arbitrary values

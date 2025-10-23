@@ -1,19 +1,35 @@
 # @photosynthesic/nubui
 
-**Custom SVG Icons Instantly Usable with Tailwind CSS**
+**Tailwind CSS Icon and Button Components**
 
-Transform your custom SVG icons into CSS masks with `currentColor` support for dynamic theming. Automatically generate `.mask-icon-*` utility classes that work seamlessly with Tailwind CSS color system. Perfect for small to medium projects (10-50 icons) where designers pull icons from various sources.
+A lightweight, framework-agnostic component library featuring custom SVG icons and accessible button components. Perfect for teams managing custom icons from various sources and need consistent, accessible button styling. Includes icon CSS mask generation, config-based button styling, and full TypeScript support.
 
 ## 🎯 Key Features
+
+### Icon System
 
 - **🎨 SVG → CSS Mask Conversion**: Automatically convert icons to `currentColor`-compatible CSS masks
 - **🎛️ Three Output Modes**: Mask (recommended), Inline SVG, and IMG modes available
 - **⚡ CLI Automation**: `icon:build` command for one-step workflow with preview
 - **👁️ Interactive Preview**: Visual preview page with color/size controls
-- **🏷️ Full TypeScript Support**: Type-safe development experience
-- **🎨 Tailwind Utilities**: Direct usage with `.mask-icon-*` classes
 - **🔍 SVGO Integration**: Automatic SVG optimization (configurable)
-- **🚀 Framework Agnostic**: Works with Vue, React, Svelte, or vanilla HTML
+
+### Button Component
+
+- **🎯 Smart Element Selection**: Auto-selects `<a>` or `<button>` based on context
+- **🎨 Config-Based Styling**: Unified design system with customizable presets
+- **🔗 Anchor-First Design**: Reflects real-world usage patterns
+- **♿ Accessibility Built-In**: ARIA attributes and keyboard navigation handled automatically
+- **🔒 Security Features**: Auto `rel="noopener noreferrer"` for external links
+- **🎭 Icon Integration**: Seamless icon positioning and sizing
+
+### General
+
+- **🏷️ Full TypeScript Support**: Type-safe development experience
+- **🚀 Framework Support**:
+  - Icons: Vue, React, Svelte, Astro, vanilla JavaScript
+  - Buttons: Astro, Next.js, and other SSR frameworks
+- **📦 SSR Ready**: Button component returns HTML strings for server-side rendering
 
 ## Installation
 
@@ -23,54 +39,102 @@ npm install @photosynthesic/nubui
 
 ## Quick Start
 
-### 1. Generate Icons with Preview (Recommended)
+### 1. Generate Icons
 
 ```bash
-# One command to generate masks, preview, and open in browser
-# (default icon directory: ./src/assets/icon)
 npx nubui icon:build
-
-# Use custom icon directory
-npx nubui icon:build -i ./assets/icons
 ```
 
-**What it does:**
-1. Reads SVG icons from `./src/assets/icon` (or custom directory)
-2. Generates optimized SVG files to `./src/assets/icon/format`
-3. Generates CSS mask utility classes like `.mask-icon-heart`
-4. Creates an interactive preview page
-5. Opens preview in your browser automatically
+This generates CSS mask utilities from your SVG icons.
 
-**What you get:**
-- `./src/assets/icon/format/*.svg` - Optimized SVG files
-- `./src/assets/scss/_icon-masks.scss` - CSS mask utilities
-- `./docs/icon-preview.html` - Interactive preview page
-- `currentColor` support for dynamic color changes
-- `::before` and `::after` pseudo-element variants
+### 2. Use Icons in HTML
 
-### Individual Commands
+```html
+<!-- Basic icon -->
+<span class="mask-icon-heart w-6 h-6 text-red-500"></span>
 
-```bash
-# Generate only CSS masks
-npx nubui icon:masks
-
-# Generate only preview page
-npx nubui icon:preview
-
-# Clean generated files
-npx nubui icon:clean
-
-# Custom paths
-npx nubui icon:masks --icons ./assets/icons --output ./styles/_icons.scss
-
-# Disable pseudo-element variants
-npx nubui icon:masks --no-pseudo
-
-# Disable SVG optimization
-npx nubui icon:masks --no-optimize
+<!-- Icon in button -->
+<button class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded">
+  <span class="mask-icon-star w-5 h-5"></span>
+  Favorite
+</button>
 ```
 
-### 2. Use Icon System (JavaScript/TypeScript)
+### 3. Create Buttons
+
+```typescript
+import { createButton } from "@photosynthesic/nubui";
+
+const link = createButton({ text: "Visit", href: "/page" });
+const submit = createButton({ text: "Submit", htmlType: "submit" });
+```
+
+## Configuration
+
+Configure Button and Icon components globally using `nubui.config.ts`.
+
+### Setup Config File
+
+Create `nubui.config.ts` at your project root:
+
+```typescript
+import type { NubuiConfig } from "@photosynthesic/nubui";
+
+export const nubuiConfig: NubuiConfig = {
+  button: {
+    // Button style presets
+    primary: "px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700",
+    danger: "px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700",
+
+    // Button sizes
+    sizes: {
+      SM: "px-2 py-1 text-sm",
+      MD: "px-4 py-2 text-base",
+      LG: "px-6 py-3 text-lg",
+    },
+
+    // Button shapes
+    shapes: {
+      round: "rounded-full",
+      square: "rounded-none",
+    },
+  },
+
+  icon: {
+    // Icon size mapping (Tailwind classes)
+    sizeMap: {
+      "16px": "w-4 h-4",
+      "24px": "w-6 h-6",
+      "32px": "w-8 h-8",
+    },
+
+    // Default icon size
+    defaultSize: "24px",
+
+    // Default color
+    defaultColor: "currentColor",
+
+    // SVG optimization
+    svgOptimization: {
+      enabled: true,
+    },
+  },
+};
+```
+
+### Load Config at Startup
+
+```typescript
+// app.ts or main.ts
+import { loadNubuiConfig } from "@photosynthesic/nubui";
+import { nubuiConfig } from "./nubui.config";
+
+loadNubuiConfig(nubuiConfig);
+```
+
+Now all buttons and icons will use your configured styles.
+
+### Advanced: Use Icons Programmatically
 
 ```typescript
 import { createIcon } from "@photosynthesic/nubui";
@@ -88,32 +152,6 @@ const customIcon = createIcon({
   attributes: { "aria-label": "Star icon" },
   styles: { cursor: "pointer" },
 });
-```
-
-### 3. Direct Tailwind Usage (Recommended)
-
-After generating SCSS masks, use directly in HTML:
-
-```html
-<!-- Basic icon usage -->
-<span class="mask-icon-heart w-6 h-6 text-red-500"></span>
-
-<!-- Icon with different sizes and colors -->
-<span class="mask-icon-star w-4 h-4 text-yellow-500"></span>
-<span class="mask-icon-home w-8 h-8 text-blue-600"></span>
-
-<!-- Button with icon -->
-<button
-  class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded"
->
-  <span class="mask-icon-star w-5 h-5"></span>
-  Favorite
-</button>
-
-<!-- Pseudo-element usage -->
-<a href="#" class="after:mask-icon-arrow-right after:w-4 after:h-4 after:ml-1">
-  Next page
-</a>
 ```
 
 ## Icon Output Modes
@@ -246,18 +284,82 @@ getRawSvgContent(name: string): string | null
 getSvgFilePath(name: string): string | null
 ```
 
-## 🚧 Coming Soon
+## Button System
 
-### Button System
+A Tailwind CSS button component system with icon integration and config-based styling.
 
-A Tailwind CSS button component system with icon integration is planned for a future release. It will include:
+### Key Features
 
-- Pre-built button presets
-- Icon integration with positioning
-- Accessibility support
-- TypeScript type safety
+- **🎯 Smart Element Selection**: Auto-selects `<a>` or `<button>` based on context
+- **🎨 Config-Based Styling**: Unified design system with customizable presets
+- **🔗 Anchor-First Design**: Reflects real-world usage (links more common than buttons)
+- **♿ Accessibility Built-In**: ARIA attributes and keyboard navigation handled automatically
+- **🔒 Security Features**: Auto `rel="noopener noreferrer"` for external links (configurable)
+- **🎭 Icon Integration**: Seamless icon positioning and sizing
+- **🚀 SSR Compatible**: Returns HTML strings, works with Astro, Next.js, etc.
 
-Stay tuned for updates!
+### Quick Button Example
+
+```typescript
+import { createButton } from "@photosynthesic/nubui";
+
+// Default anchor link
+const link = createButton({ text: "Visit", href: "/page" });
+// → <a href="/page" class="...">Visit</a>
+
+// Form submit button
+const submit = createButton({ text: "Submit", htmlType: "submit" });
+// → <button type="submit" class="...">Submit</button>
+
+// With icon
+const download = createButton({
+  text: "Download",
+  icon: "download",
+  type: "primary",
+  size: "LG",
+});
+// → <a href="#" class="flex items-center gap-2 px-6 py-3 bg-blue-600 ...">
+//     <span class="mask-icon-download ..."></span>
+//     <span>Download</span>
+//   </a>
+
+// External link (auto security)
+const external = createButton({
+  text: "External",
+  href: "https://example.com",
+  target: "_blank", // Auto adds rel="noopener noreferrer"
+});
+```
+
+### Customize with Config
+
+```typescript
+import { configureButton } from "@photosynthesic/nubui/button";
+
+configureButton({
+  // Custom button types
+  primary: "px-4 py-2 bg-blue-600 text-white rounded",
+  danger: "px-4 py-2 bg-red-600 text-white rounded",
+
+  // Custom sizes
+  sizes: {
+    SM: "px-2 py-1 text-sm",
+    LG: "px-6 py-3 text-lg",
+  },
+
+  // Custom shapes
+  shapes: {
+    pill: "rounded-full px-6",
+  },
+
+  // Custom disabled state
+  disabled: "opacity-40 cursor-not-allowed",
+});
+```
+
+### Full API Reference
+
+See [spec.md](./spec.md) for complete ButtonProps interface and examples.
 
 ## Development Workflow
 
@@ -283,6 +385,7 @@ Stay tuned for updates!
    ```
 
    This will:
+
    - Generate optimized SVGs to `./src/assets/icon/format/`
    - Generate `./src/assets/scss/_icon-masks.scss`
    - Create `./docs/icon-preview.html`
@@ -396,7 +499,12 @@ interface IconProps {
   className?: string;
 }
 
-export function Icon({ name, size = 24, color = "currentColor", className }: IconProps) {
+export function Icon({
+  name,
+  size = 24,
+  color = "currentColor",
+  className,
+}: IconProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

@@ -6,6 +6,10 @@
 // Main icon creation function
 export { createIcon } from "./icon";
 
+// Icon configuration
+export { configureIcon, resetIconConfig } from "./config";
+export type { IconConfig } from "./config";
+
 // Icon utilities
 export {
   getAvailableIcons,
