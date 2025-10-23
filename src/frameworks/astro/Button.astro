@@ -1,0 +1,18 @@
+---
+import { createButton, type ButtonProps, loadNubuiConfig, type NubuiConfig } from '@photosynthesic/nubui';
+
+interface Props extends ButtonProps {
+  config?: NubuiConfig;
+}
+
+const { config, ...buttonProps } = Astro.props as Props;
+
+// Load config if provided
+if (config) {
+  loadNubuiConfig(config);
+}
+
+const html = createButton(buttonProps);
+---
+
+<Fragment set:html={html} />

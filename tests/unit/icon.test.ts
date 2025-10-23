@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach, beforeAll } from "vitest";
+import { describe, it, expect, beforeEach, beforeAll, afterEach } from "vitest";
 import {
   createIcon,
   createIconElement,
   getAvailableIcons,
   iconExists,
 } from "../../src/icon/icon";
+import { configureIcon, resetIconConfig } from "../../src/icon/config";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
@@ -22,6 +23,10 @@ describe("Icon System - createIcon (SSR/HTML string)", () => {
 
     // Create test SVG file
     fs.writeFileSync(path.join(tempIconDir, "test-icon.svg"), testSvg);
+  });
+
+  afterEach(() => {
+    resetIconConfig();
   });
 
   it("should return span with mask classes by default", () => {
@@ -147,5 +152,86 @@ describe("Icon System - Helper functions", () => {
     const exists = iconExists("test-icon");
 
     expect(typeof exists).toBe("boolean");
+  });
+});
+
+describe("Icon System - Configuration Integration", () => {
+  let tempIconDir: string;
+  const testSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="10" fill="currentColor"/>
+</svg>`;
+
+  beforeEach(() => {
+    // Create temporary icon directory
+    tempIconDir = fs.mkdtempSync(path.join(os.tmpdir(), "nubui-icon-config-test-"));
+    process.env.NUBUI_ICON_DIR = tempIconDir;
+
+    // Create test SVG file
+    fs.writeFileSync(path.join(tempIconDir, "test-icon.svg"), testSvg);
+  });
+
+  afterEach(() => {
+    resetIconConfig();
+  });
+
+  it("should use custom sizeMap from config in createIconElement", () => {
+    configureIcon({
+      sizeMap: {
+        "24px": "w-8 h-8", // Override default 24px mapping
+      },
+    });
+
+    const icon = createIconElement({ name: "test-icon", size: 24 });
+    expect(icon.classList.contains("w-8")).toBe(true);
+    expect(icon.classList.contains("h-8")).toBe(true);
+    expect(icon.classList.contains("w-6")).toBe(false); // Should NOT use default
+  });
+
+  it("should use configurable defaultSize in createIconElement", () => {
+    configureIcon({
+      defaultSize: "32px",
+    });
+
+    const icon = createIconElement({ name: "test-icon" }); // No size specified
+    expect(icon.classList.contains("w-8")).toBe(true); // 32px maps to w-8 h-8
+    expect(icon.classList.contains("h-8")).toBe(true);
+    expect(icon.classList.contains("w-6")).toBe(false); // Should NOT use default 24px
+  });
+
+  it("should use configurable defaultColor in createIconElement", () => {
+    configureIcon({
+      defaultColor: "red-500",
+    });
+
+    const icon = createIconElement({ name: "test-icon" });
+    expect(icon.classList.contains("text-red-500")).toBe(true);
+  });
+
+  it("should override config with explicit prop values in createIconElement", () => {
+    configureIcon({
+      defaultSize: "16px",
+      defaultColor: "red-500",
+    });
+
+    const icon = createIconElement({
+      name: "test-icon",
+      size: 32, // Override config default
+      color: "blue-500", // Override config default
+    });
+    expect(icon.classList.contains("w-8")).toBe(true); // 32px, not 16px from config
+    expect(icon.classList.contains("text-blue-500")).toBe(true); // blue, not red from config
+  });
+
+  it("should reset to default configuration", () => {
+    configureIcon({
+      defaultSize: "48px",
+      defaultColor: "red-600",
+    });
+
+    resetIconConfig();
+
+    const icon = createIconElement({ name: "test-icon" });
+    expect(icon.classList.contains("w-6")).toBe(true); // Back to default 24px
+    expect(icon.classList.contains("h-6")).toBe(true);
   });
 });

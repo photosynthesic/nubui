@@ -1,0 +1,83 @@
+---
+import { Icon, Button } from '@photosynthesic/nubui/astro';
+import type { NubuiConfig } from '@photosynthesic/nubui';
+
+// Define custom config
+const customConfig: NubuiConfig = {
+  button: {
+    primary: "px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold",
+    danger: "px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700",
+    sizes: {
+      SM: "px-2 py-1 text-sm",
+      MD: "px-3 py-1.5 text-base",
+      LG: "px-6 py-3 text-lg font-bold",
+    },
+  },
+  icon: {
+    defaultSize: "24px",
+    defaultColor: "gray-700",
+  },
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>nubui Custom Config Test</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 2rem;
+      }
+      h1 { color: #333; }
+      h2 { color: #666; margin-top: 2rem; }
+      .demo { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+    </style>
+  </head>
+  <body>
+    <h1>nubui Custom Configuration Test</h1>
+
+    <section>
+      <h2>Button - Custom Primary Style</h2>
+      <div class="demo">
+        <Button config={customConfig} text="Custom Primary" type="primary" />
+      </div>
+      <p>Should use indigo-600 (custom config) instead of blue-600 (default)</p>
+    </section>
+
+    <section>
+      <h2>Button - Custom Danger Style</h2>
+      <div class="demo">
+        <Button config={customConfig} text="Custom Danger" type="danger" />
+      </div>
+      <p>Should use rose-600 (custom config) instead of red-600 (default)</p>
+    </section>
+
+    <section>
+      <h2>Button - Custom Sizes</h2>
+      <div class="demo">
+        <Button config={customConfig} text="Small" size="SM" />
+        <Button config={customConfig} text="Medium" size="MD" />
+        <Button config={customConfig} text="Large" size="LG" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Icon - Custom Default Size & Color</h2>
+      <div class="demo">
+        <Icon config={customConfig} name="heart" />
+        <Icon config={customConfig} name="star" />
+      </div>
+      <p>Should use defaultColor: gray-700 from config</p>
+    </section>
+
+    <section>
+      <h2>Icon - Explicit Props Override Config</h2>
+      <div class="demo">
+        <Icon config={customConfig} name="heart" size={32} color="red-500" />
+      </div>
+      <p>Should override the default gray-700 color with red-500</p>
+    </section>
+  </body>
+</html>

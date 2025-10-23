@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "declaration": true,
     "declarationDir": "./types",
     "outDir": "./lib",
@@ -13,7 +13,12 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "types": ["node"],
-    "lib": ["ES2020", "DOM"]
+    "lib": ["ES2020", "DOM"],
+    "baseUrl": ".",
+    "paths": {
+      "@photosynthesic/nubui/icon": ["./src/icon/index.ts"],
+      "@photosynthesic/nubui/button": ["./src/button/index.ts"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "lib", "types", "temp-reference"]

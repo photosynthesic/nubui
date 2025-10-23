@@ -1,23 +1,122 @@
 ---
-import { Icon } from '@photosynthesic/nubui/astro';
+import { Icon, Button } from '@photosynthesic/nubui/astro';
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>nubui Astro Icon Test</title>
+    <title>nubui Astro Icon & Button Test</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 2rem;
+      }
+      h1 {
+        color: #333;
+      }
+      h2 {
+        color: #666;
+        margin-top: 2rem;
+      }
+      .demo {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin: 1rem 0;
+      }
+      button, a[role="button"] {
+        cursor: pointer;
+        font-family: inherit;
+      }
+    </style>
   </head>
   <body>
-    <h1>nubui Icon Component Test</h1>
+    <h1>nubui Components Test</h1>
 
-    <h2>Mask Mode (default)</h2>
-    <Icon name="heart" size={24} color="red-500" />
+    <section>
+      <h2>Icon Component - Mask Mode (default)</h2>
+      <div class="demo">
+        <Icon name="heart" size={24} color="red-500" />
+        <Icon name="star" size={24} color="yellow-500" />
+      </div>
 
-    <h2>Inline Mode</h2>
-    <Icon name="star" mode="inline" size={32} color="#fbbf24" />
+      <h2>Icon Component - Inline Mode</h2>
+      <div class="demo">
+        <Icon name="star" mode="inline" size={32} color="#fbbf24" />
+      </div>
 
-    <h2>IMG Mode</h2>
-    <Icon name="heart" mode="img" size={48} alt="Heart icon" />
+      <h2>Icon Component - IMG Mode</h2>
+      <div class="demo">
+        <Icon name="heart" mode="img" size={48} alt="Heart icon" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Button Component - Basic Types</h2>
+      <div class="demo">
+        <Button text="Basic" />
+        <Button text="Primary" type="primary" />
+        <Button text="Danger" type="danger" />
+      </div>
+
+      <h2>Button Component - Sizes</h2>
+      <div class="demo">
+        <Button text="Small" size="SM" />
+        <Button text="Medium" size="MD" />
+        <Button text="Large" size="LG" />
+      </div>
+
+      <h2>Button Component - Shapes</h2>
+      <div class="demo">
+        <Button text="Default" shape="default" />
+        <Button text="Round" shape="round" />
+        <Button text="O" shape="circle" />
+      </div>
+
+      <h2>Button Component - States</h2>
+      <div class="demo">
+        <Button text="Normal" type="primary" />
+        <Button text="Disabled" type="primary" disabled />
+        <Button text="Block" type="primary" block={true} />
+      </div>
+
+      <h2>Button Component - With Icons</h2>
+      <div class="demo">
+        <Button text="Heart" icon="heart" iconPosition="start" />
+        <Button text="Star" icon="star" iconPosition="end" type="primary" />
+      </div>
+
+      <h2>Button Component - Anchor Links</h2>
+      <div class="demo">
+        <Button text="Link" href="#section" />
+        <Button text="External" href="https://example.com" target="_blank" type="primary" />
+        <Button text="Disabled Link" href="#" disabled />
+      </div>
+
+      <h2>Button Component - Form Types</h2>
+      <div class="demo">
+        <Button text="Submit" htmlType="submit" />
+        <Button text="Reset" htmlType="reset" />
+        <Button text="Button" htmlType="button" />
+      </div>
+
+      <h2>Button Component - Complex Examples</h2>
+      <div class="demo">
+        <Button
+          text="Large Primary with Icon"
+          type="primary"
+          size="LG"
+          icon="heart"
+          iconPosition="start"
+        />
+        <Button
+          text="Small Rounded Danger"
+          type="danger"
+          size="SM"
+          shape="round"
+        />
+      </div>
+    </section>
   </body>
 </html>

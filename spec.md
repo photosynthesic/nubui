@@ -120,48 +120,6 @@ const iconElem = createIconElement({ name: "heart", ... });
 
 ## パッケージ構成
 
-### Monorepo 戦略（将来対応）
-
-プロジェクトは将来的に monorepo 化を想定し、個別パッケージとして分離可能な設計を採用。
-
-#### パッケージ分割方針
-
-```
-@photosynthesic/nubui          # メインパッケージ（icon + button）
-@photosynthesic/nubui-icon     # アイコンのみ（軽量版）
-@photosynthesic/nubui-button   # ボタンのみ（軽量版）
-```
-
-#### 開発ツール
-
-- **パッケージマネージャー**: yarn
-  - yarn workspaces による monorepo 管理
-  - 成熟したエコシステムと豊富なドキュメント
-- **ビルドツール**: Vite（各パッケージ個別ビルド）
-- **バージョン管理**: Changesets（複数パッケージの同期リリース）
-
-#### ユーザーの選択肢
-
-```bash
-# 最小構成（アイコンのみ）
-npm install @photosynthesic/nubui-icon
-
-# アイコン + ボタン
-npm install @photosynthesic/nubui-icon @photosynthesic/nubui-button
-
-# 全部入り（推奨）
-npm install @photosynthesic/nubui
-```
-
-#### 依存関係
-
-```
-@photosynthesic/nubui
-├─ @photosynthesic/nubui-icon
-└─ @photosynthesic/nubui-button
-   └─ @photosynthesic/nubui-icon（アイコン統合機能用）
-```
-
 ### 開発フェーズ
 
 #### Phase 1（現在）: シングルパッケージ
@@ -811,47 +769,52 @@ export const nubuiConfig = {
 ### 基本 API
 
 ```typescript
-import {
-  createButton,
-  createIcon,
-  configureNubui,
-} from "@photosynthesic/nubui";
-import { nubuiConfig } from "./nubui.config.js";
+import { createButton, createIcon } from "@photosynthesic/nubui";
+import { configureButton } from "@photosynthesic/nubui/button";
 
-// 1. 設定を初期化（アプリ起動時に一度だけ）
-configureNubui(nubuiConfig);
+// 1. ボタン設定を初期化（アプリ起動時に一度だけ）
+configureButton({
+  primary: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700",
+  danger: "px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700",
+  sizes: {
+    SM: "px-2 py-1 text-sm",
+    MD: "px-4 py-2 text-base",
+    LG: "px-6 py-3 text-lg",
+  },
+});
 
 // 2. 基本使用法（設定が自動適用）
 const button = createButton({ text: "Click me" });
-// → config.button.basic のスタイルが自動適用
-
-const icon = createIcon({ name: "heart-line", size: "md" });
-// → config.icon.sizes.md のサイズが自動適用
+// → デフォルト anchor 要素、basic スタイル
 
 const primaryButton = createButton({ text: "Submit", type: "primary" });
-// → config.button.primary のスタイルが自動適用
+// → primary スタイルが自動適用
 
-const smallButton = createButton({ text: "Small", size: "sm" });
-// → config.button.basic + config.button.sizes.sm が適用
+const smallButton = createButton({ text: "Small", size: "SM" });
+// → basic + SM サイズが適用
+
+// button 要素として明示的に生成
+const submitButton = createButton({
+  text: "Submit Form",
+  element: "button",
+  htmlType: "submit",
+});
 
 // カスタム設定
 const customButton = createButton({
-  text: "Submit Form",
-  element: "button", // 'button' | 'a'
-  htmlType: "submit", // 'button' | 'submit' | 'reset'
-  className: "px-6 py-3 bg-green-500",
+  text: "Custom Button",
+  type: "primary",
+  size: "LG",
+  shape: "round",
+  block: true,
   disabled: false,
-  href: "#", // anchor要素の場合
-  target: "_blank", // anchor要素の場合
+  href: "/page", // 指定すると自動的に <a> タグ
 
-  // 拡張プロパティ（段階的拡張）
-  type: "primary", // 'primary' | 'dashed' | 'text' | 'link' | 'danger'
-  size: "LG", // 'SM' | 'MD' | 'LG'
-  shape: "round", // 'default' | 'circle' | 'round'
-  block: true, // 全幅ボタン
+  // クラスカスタマイズ
+  classes: ["shadow-lg", "transform", "hover:scale-105"],
 
   // アイコン統合
-  icon: "rocket-line",
+  icon: "rocket",
   iconPosition: "start", // 'start' | 'end'
   iconSize: 20,
   iconMode: "mask", // 'mask' | 'inline' | 'img'
@@ -863,53 +826,41 @@ const customButton = createButton({
 ```typescript
 interface ButtonProps {
   // 基本プロパティ
-  text?: string;
-  className?: string; // 追加クラス（設定に加えて適用）
+  text?: string; // ボタンテキスト
 
   // HTML要素選択（基本は自動判定）
-  element?: "button" | "a"; // オプション: 明示的に要素タイプを指定（上級者向け）
-  htmlType?: "button" | "submit" | "reset"; // button要素の場合のtype属性
-  href?: string; // 指定すると自動的に<a>タグになる
-  target?: "_blank" | "_self" | "_parent" | "_top"; // anchor要素の場合
+  element?: "button" | "a"; // 明示的に要素タイプを指定（デフォルト: anchor）
+  htmlType?: "button" | "submit" | "reset"; // button要素のtype属性
+  href?: string; // 指定すると<a>タグ（既にデフォルト）
+  target?: "_blank" | "_self" | "_parent" | "_top"; // anchor要素の場合のtarget属性
+  rel?: string; // anchor要素のrel属性（target="_blank"で自動付与可能）
   disabled?: boolean; // 両要素タイプで適切に処理
 
-  // 自動判定ロジック:
-  // - href が指定 → <a>タグ
-  // - href が未指定 → <button>タグ
-  // - element で明示指定も可能（上級者向け）
+  // セキュリティ制御
+  autoSecurity?: boolean; // target="_blank"時にrel="noopener noreferrer"を自動付与（デフォルト: true）
 
-  // アクセシビリティ制御
-  autoAccessibility?: boolean; // デフォルト: true（ARIA属性等の自動付与）
-  autoSecurity?: boolean; // デフォルト: true（rel="noopener"等の自動付与）
-  suppressWarnings?: boolean; // デフォルト: false（ベストプラクティス警告の表示制御）
+  // 自動判定ロジック:
+  // - デフォルト → <a>タグ（anchor）
+  // - htmlType が指定 → <button>タグ（自動判定）
+  // - element="button" 明示指定 → <button>タグ
+
+  // スタイルカスタマイズ
+  type?: string; // 設定ファイルで定義されたタイプ（"basic" | "primary" | "danger" + カスタム）
+  size?: string; // 設定ファイルで定義されたサイズ（"SM" | "MD" | "LG" + カスタム）
+  shape?: string; // 設定ファイルで定義された形状（"default" | "circle" | "round" + カスタム）
+  block?: boolean; // 全幅ボタン（w-full を適用）
+  classes?: string[]; // 追加クラス配列（設定に加えて適用）
+
+  // アイコン統合
+  icon?: string; // アイコン名
+  iconPosition?: "start" | "end"; // アイコン位置（デフォルト: "start"）
+  iconSize?: number; // アイコンサイズ（ピクセル）
+  iconMode?: "mask" | "inline" | "img"; // アイコン出力モード
 
   // バリデーション
   // 以下の組み合わせはValidationエラー（実行時エラー）:
   // - element="button" かつ href が指定されている
   // - element="a" かつ htmlType が指定されている
-
-  // イベントハンドラ
-  onClick?: (event: Event) => void | Promise<void>;
-
-  // スタイルカスタマイズ
-  attributes?: Record<string, string>; // カスタムHTML属性（自動設定を上書き可能）
-  overrideClasses?: boolean; // 設定スタイルを無視してclassNameのみ使用
-
-  // 設定ベースのスタイリング
-  type?: string; // 設定ファイルで定義されたタイプ（"basic" | "primary" | "danger" + カスタム）
-  size?: string; // 設定ファイルで定義されたサイズ（"sm" | "md" | "lg" + カスタム）
-  shape?: string; // 設定ファイルで定義された形状（"default" | "circle" | "round" + カスタム）
-  block?: boolean; // 全幅ボタン
-
-  // アイコン統合
-  icon?: string; // アイコン名
-  iconPosition?: "start" | "end"; // アイコン位置
-  iconSize?: string; // 設定ファイルのサイズキーまたはTailwindクラス
-  iconMode?: "img" | "inline" | "mask"; // アイコン出力モード
-
-  // ローディング状態（UX改善）
-  loading?: boolean; // ローディング中の視覚的表示とdisabled状態を自動制御
-  loadingText?: string; // ローディング中のテキスト（デフォルト: "{text}中..."）
 }
 ```
 
@@ -1187,19 +1138,26 @@ const ctaButton = createButton({
 
 #### 自動判定ロジック
 
-**anchor 要素が選択される条件:**
+**anchor 要素がデフォルト（推奨）:**
 
-- `href` プロパティが指定されている
-- ナビゲーション用途（ページ遷移、リンク）
+- リンク中心の設計思想（ナビゲーションがより一般的）
+- `href` 未指定時も anchor 要素が生成される（デフォルト `href="#"` を付与）
+- ナビゲーション用途：`href="/page"` で内部・外部リンク実装
 
 **button 要素が選択される条件:**
 
-- `href` プロパティが未指定
-- フォーム操作、アクション実行用途
+- `element: "button"` で明示的に指定
+- フォーム操作（`htmlType: "submit"` など）
 
 #### anchor 要素の出力例
 
 ```typescript
+// デフォルト（href省略）
+const defaultButton = createButton({
+  text: "Click me",
+});
+// 出力: <a href="#" class="...">Click me</a>
+
 // 内部リンク
 const internalLink = createButton({
   text: "製品ページへ",
@@ -1207,13 +1165,31 @@ const internalLink = createButton({
 });
 // 出力: <a href="/products" class="...">製品ページへ</a>
 
-// 外部リンク（自動でrel="noopener"追加）
+// 外部リンク（自動でrel="noopener noreferrer"追加）
 const externalLink = createButton({
   text: "外部サイト",
   href: "https://example.com",
   target: "_blank",
 });
-// 出力: <a href="https://example.com" target="_blank" rel="noopener" class="...">外部サイト</a>
+// 出力: <a href="https://example.com" target="_blank" rel="noopener noreferrer" class="...">外部サイト</a>
+
+// rel属性をカスタマイズ
+const customRel = createButton({
+  text: "Custom Rel",
+  href: "https://example.com",
+  target: "_blank",
+  rel: "noopener",
+});
+// 出力: <a href="https://example.com" target="_blank" rel="noopener" class="...">Custom Rel</a>
+
+// セキュリティを無効化（autoSecurity=false）
+const noSecurity = createButton({
+  text: "No Security",
+  href: "https://example.com",
+  target: "_blank",
+  autoSecurity: false,
+});
+// 出力: <a href="https://example.com" target="_blank" class="...">No Security</a>
 ```
 
 #### button 要素の出力例
@@ -1222,6 +1198,7 @@ const externalLink = createButton({
 // フォーム送信
 const submitButton = createButton({
   text: "送信",
+  element: "button",
   htmlType: "submit",
 });
 // 出力: <button type="submit" class="...">送信</button>
@@ -1229,7 +1206,7 @@ const submitButton = createButton({
 // 一般的なアクション
 const actionButton = createButton({
   text: "保存",
-  onClick: handleSave,
+  element: "button",
 });
 // 出力: <button type="button" class="...">保存</button>
 ```
@@ -1361,11 +1338,10 @@ createButton({ text: "Button B", type: "primary" });
 
 #### 教育不要で得られるベネフィット
 
-1. **セマンティクス自動対応**: `href` の有無で適切な要素タイプを自動選択
-2. **アクセシビリティ自動対応**: ARIA 属性、キーボードナビゲーション、フォーカス管理
-3. **一貫性自動保証**: 設定ファイルベースで統一されたデザインシステム
-4. **セキュリティ自動対応**: 外部リンクの `rel="noopener"` 自動付与
-5. **UX 自動改善**: ローディング状態、disabled 状態の適切な視覚表現
+1. **アクセシビリティ自動対応**: ARIA 属性、キーボードナビゲーション、フォーカス管理
+2. **一貫性自動保証**: 設定ファイルベースで統一されたデザインシステム
+3. **セキュリティ自動対応**: 外部リンクの `rel="noopener noreferrer"` 自動付与（制御可能）
+4. **disabled 状態の適切な処理**: 要素タイプに応じた ARIA 属性またはブラウザネイティブ属性の自動設定
 
 ### 使用パターン
 
@@ -1421,156 +1397,7 @@ const ctaButton = createButton({
 });
 ```
 
-## 9. プレビュー機能（Storybook 風）
-
-### HTML プレビュー生成
-
-```bash
-# プレビューHTMLファイル生成
-npx @photosynthesic/nubui generate-preview
-
-# カスタム設定
-npx @photosynthesic/nubui generate-preview --output ./docs/preview.html --config ./nubui.config.js
-```
-
-### CLI オプション
-
-- `--output, -o <path>`: 出力 HTML ファイルパス (デフォルト: `./nubui-preview.html`)
-- `--config, -c <path>`: 設定ファイルパス (デフォルト: `./nubui.config.js`)
-- `--icon-dir, -i <path>`: アイコンディレクトリパス (デフォルト: `./src/assets/icon/format`)
-- `--theme <theme>`: プレビューテーマ `light` | `dark` | `auto` (デフォルト: `auto`)
-
-### 生成される HTML ファイル構造
-
-#### アイコンセクション
-
-**生成要件:**
-
-- 全アイコンの一覧表示（3 つのモード別）
-- 各アイコンの名前とプレビュー
-- コードコピー機能
-- サイズ・カラー切り替えコントロール
-- 検索・フィルタリング機能
-
-#### ボタンセクション
-
-**生成要件:**
-
-- 設定ファイルから読み込んだスタイルでボタン一覧表示
-- 基本タイプ（basic, primary, danger 等）の表示
-- サイズバリエーション（sm, md, lg）の表示
-- アイコン付きボタンの表示
-- 状態サンプル（normal, disabled, loading）の表示
-- 現在の設定内容の表示
-
-### 設定ファイル統合
-
-```typescript
-// プレビュー生成時に設定ファイルを読み込んで反映
-interface PreviewGeneratorConfig {
-  configPath?: string; // nubui.config.js のパス
-  iconDir: string; // アイコンディレクトリ
-  outputPath: string; // 出力HTMLファイルパス
-  theme: "light" | "dark" | "auto"; // プレビューテーマ
-  includeCodeSamples: boolean; // コードサンプル表示
-}
-
-export function generatePreview(config: PreviewGeneratorConfig): void {
-  // 1. 設定ファイル読み込み
-  // 2. アイコン一覧取得
-  // 3. ボタンサンプル生成
-  // 4. HTMLテンプレート生成
-  // 5. ファイル出力
-}
-```
-
-### 生成 HTML の特徴
-
-#### インタラクティブ機能
-
-**実装要件:**
-
-- コードコピー機能（JavaScript API 使用例のコピー）
-- サイズ・カラー切り替え（リアルタイムプレビュー更新）
-- 検索・フィルタリング（アイコン名検索、モード別フィルタ）
-
-#### デザイン要件
-
-**技術仕様:**
-
-- 完全に Tailwind CSS クラスで構築
-- ダークモード対応（`dark:` プレフィックス使用）
-- レスポンシブデザイン（`sm:`, `md:`, `lg:` ブレークポイント）
-- 独自 CSS クラスは使用しない
-
-### 実用的な機能
-
-#### 1. 検索・フィルタリング
-
-**機能要件:**
-
-- アイコン名での検索機能
-- モード別フィルタリング（mask/inline/img）
-- ボタンタイプ別フィルタリング（basic/primary/danger 等）
-
-#### 2. 設定プレビュー
-
-**表示要件:**
-
-- 現在の nubui.config.js の内容を JSON 形式で表示
-- シンタックスハイライト対応
-
-#### 3. 使用方法ガイド
-
-**ガイド内容:**
-
-- JavaScript/TypeScript 使用例
-- HTML 直接使用例（Tailwind クラス）
-- 折り畳み可能なセクション
-
-### CLI 実装仕様
-
-```typescript
-// bin/generate-preview.js
-interface PreviewCliOptions {
-  output?: string;
-  config?: string;
-  icons?: string; // iconDir → icons に統一
-  theme?: "light" | "dark" | "auto";
-  includeCodeSamples?: boolean;
-}
-
-export function generatePreviewCommand(options: PreviewCliOptions): void {
-  const config = {
-    configPath: options.config || "./nubui.config.js",
-    iconDir: options.iconDir || "./src/assets/icon/format", // iconDir オプション
-    outputPath: options.output || "./nubui-preview.html",
-    theme: options.theme || "auto",
-    includeCodeSamples: options.includeCodeSamples ?? true,
-  };
-
-  generatePreview(config);
-  console.log(`✅ プレビューファイルを生成しました: ${config.outputPath}`);
-}
-```
-
-### package.json 更新
-
-```json
-{
-  "bin": {
-    "generate-masks": "./bin/generate-masks.js",
-    "generate-preview": "./bin/generate-preview.js"
-  },
-  "scripts": {
-    "generate-masks": "node bin/generate-masks.js",
-    "generate-preview": "node bin/generate-preview.js",
-    "preview": "npm run generate-preview && open nubui-preview.html"
-  }
-}
-```
-
-## 10. テスト仕様
+## 9. テスト仕様
 
 ### テスト環境要件
 
@@ -1965,9 +1792,177 @@ npm publish --access public
 npm publish
 ```
 
-### 自動リリース（将来実装予定）
+## 10. 今後の実装予定
 
-GitHub Actions を使用した自動 publish 設定。
+このセクションでは、まだ実装されていないが将来的に追加予定の機能をまとめています。
+
+### Phase 2: Monorepo 化（機能が安定してから）
+
+プロジェクトは将来的に monorepo 化を想定し、個別パッケージとして分離可能な設計を採用。
+
+#### パッケージ分割方針
+
+```
+@photosynthesic/nubui          # メインパッケージ（icon + button）
+@photosynthesic/nubui-icon     # アイコンのみ（軽量版）
+@photosynthesic/nubui-button   # ボタンのみ（軽量版）
+```
+
+#### 開発ツール
+
+- **パッケージマネージャー**: yarn
+  - yarn workspaces による monorepo 管理
+  - 成熟したエコシステムと豊富なドキュメント
+- **ビルドツール**: Vite（各パッケージ個別ビルド）
+- **バージョン管理**: Changesets（複数パッケージの同期リリース）
+
+#### ユーザーの選択肢
+
+```bash
+# 最小構成（アイコンのみ）
+npm install @photosynthesic/nubui-icon
+
+# アイコン + ボタン
+npm install @photosynthesic/nubui-icon @photosynthesic/nubui-button
+
+# 全部入り（推奨）
+npm install @photosynthesic/nubui
+```
+
+#### 依存関係
+
+```
+@photosynthesic/nubui
+├─ @photosynthesic/nubui-icon
+└─ @photosynthesic/nubui-button
+   └─ @photosynthesic/nubui-icon（アイコン統合機能用）
+```
+
+#### Monorepo ディレクトリ構成
+
+```
+nubui/
+├── packages/
+│   ├── icon/                    # @photosynthesic/nubui-icon
+│   │   ├── bin/
+│   │   │   └── generate-masks.js
+│   │   ├── src/
+│   │   │   ├── icon.ts
+│   │   │   ├── icon-loader.ts
+│   │   │   ├── svg-utils.ts
+│   │   │   └── icon-mask-generator.ts
+│   │   └── package.json
+│   │
+│   ├── button/                  # @photosynthesic/nubui-button
+│   │   ├── src/
+│   │   │   ├── button.ts
+│   │   │   └── types.ts
+│   │   └── package.json
+│   │
+│   └── nubui/                   # @photosynthesic/nubui（icon + button）
+│       ├── src/
+│       │   └── index.ts         # icon + button を再エクスポート
+│       └── package.json
+│
+├── package.json                 # ルート（private: true）
+└── README.md
+```
+
+### Phase 3: コンポーネント拡張（将来）
+
+Input、Modal、Form システムなど、追加 UI コンポーネントの実装。
+
+```
+packages/
+├── icon/
+├── button/
+├── input/                       # フォーム入力コンポーネント
+├── modal/                       # モーダル・ダイアログ
+├── form/                        # フォームシステム
+└── nubui/                       # すべてを含むメインパッケージ
+```
+
+### プレビュー機能（Storybook 風）
+
+HTML プレビュー生成機能（将来実装予定）
+
+#### 概要
+
+生成されたアイコンとボタンを視覚的に確認するための開発用 HTML ページ。
+
+#### CLI コマンド
+
+```bash
+# プレビューHTMLファイル生成
+npx @photosynthesic/nubui generate-preview
+
+# カスタム設定
+npx @photosynthesic/nubui generate-preview --output ./docs/preview.html --config ./nubui.config.js
+```
+
+#### CLI オプション
+
+- `--output, -o <path>`: 出力 HTML ファイルパス (デフォルト: `./nubui-preview.html`)
+- `--config, -c <path>`: 設定ファイルパス (デフォルト: `./nubui.config.js`)
+- `--icon-dir, -i <path>`: アイコンディレクトリパス (デフォルト: `./src/assets/icon/format`)
+- `--theme <theme>`: プレビューテーマ `light` | `dark` | `auto` (デフォルト: `auto`)
+
+#### 生成される HTML ファイル構造
+
+**アイコンセクション:**
+
+- 全アイコンの一覧表示（3 つのモード別）
+- 各アイコンの名前とプレビュー
+- コードコピー機能
+- サイズ・カラー切り替えコントロール
+- 検索・フィルタリング機能
+
+**ボタンセクション:**
+
+- 設定ファイルから読み込んだスタイルでボタン一覧表示
+- 基本タイプ（basic, primary, danger 等）の表示
+- サイズバリエーション（sm, md, lg）の表示
+- アイコン付きボタンの表示
+- 状態サンプル（normal, disabled, loading）の表示
+- 現在の設定内容の表示
+
+#### 実装仕様
+
+```typescript
+interface PreviewGeneratorConfig {
+  configPath?: string; // nubui.config.js のパス
+  iconDir: string; // アイコンディレクトリ
+  outputPath: string; // 出力HTMLファイルパス
+  theme: "light" | "dark" | "auto"; // プレビューテーマ
+  includeCodeSamples: boolean; // コードサンプル表示
+}
+
+export function generatePreview(config: PreviewGeneratorConfig): void {
+  // 1. 設定ファイル読み込み
+  // 2. アイコン一覧取得
+  // 3. ボタンサンプル生成
+  // 4. HTMLテンプレート生成
+  // 5. ファイル出力
+}
+```
+
+#### インタラクティブ機能
+
+- コードコピー機能（JavaScript API 使用例のコピー）
+- サイズ・カラー切り替え（リアルタイムプレビュー更新）
+- 検索・フィルタリング（アイコン名検索、モード別フィルタ）
+- 設定プレビュー（nubui.config.js の内容を JSON 形式で表示）
+
+#### デザイン要件
+
+- 完全に Tailwind CSS クラスで構築
+- ダークモード対応（`dark:` プレフィックス使用）
+- レスポンシブデザイン（`sm:`, `md:`, `lg:` ブレークポイント）
+- 独自 CSS クラスは使用しない
+
+### 自動リリース（GitHub Actions）
+
+GitHub Actions を使用した自動 publish 設定（将来実装予定）
 
 #### 実装方針
 
@@ -1996,12 +1991,30 @@ GitHub Actions を使用した自動 publish 設定。
 - リリース時のミスを防止
 - テストが通らない場合は publish しない（品質保証）
 
-#### 参考資料
+### Button Component - attributes プロパティ追加
 
-- GitHub Actions: npm publish
-- Semantic Versioning
-- Changesets（monorepo 化後）
+Icon と同様に、Button にもカスタム HTML 属性を指定できるプロパティを追加する予定。
 
-````
+```typescript
+interface ButtonProps {
+  // ... 既存プロパティ ...
+
+  // カスタムHTML属性（計画中）
+  attributes?: Record<string, string>;
+}
 ```
-````
+
+**使用例:**
+
+```typescript
+const customButton = createButton({
+  text: "Action",
+  type: "primary",
+  attributes: {
+    "data-tracking": "custom-button",
+    "data-event": "click-action",
+  },
+});
+```
+
+Icon の attributes と同じ使い方で、Button でもカスタム属性を付与できるようにする。
