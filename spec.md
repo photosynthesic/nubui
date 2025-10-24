@@ -92,6 +92,7 @@ npx nubui <command> [options]
 npx nubui icon:build     # アイコンのビルドとプレビュー（推奨）
 npx nubui icon:masks     # マスクCSS生成のみ
 npx nubui icon:preview   # プレビューHTML生成のみ
+npx nubui icon:unused    # 未使用アイコンを検出
 npx nubui icon:clean     # 生成ファイルの削除
 
 # ヘルプ
@@ -130,6 +131,23 @@ npx nubui icon:masks [options]
 - `--no-optimize`: SVG 最適化（svgo）をスキップ
 - `--help, -h`: ヘルプ表示
 
+**生成方式:**
+
+SVG を Base64 エンコードして SCSS に埋め込みます。
+
+```scss
+.mask-icon-heart {
+  -webkit-mask-image: url('data:image/svg+xml;base64,PHN2ZyB...');
+  mask-image: url('data:image/svg+xml;base64,PHN2ZyB...');
+}
+```
+
+**特徴:**
+- ネットワークリクエスト不要（全て CSS に埋め込まれている）
+- すべてのアイコンが事前読み込みされる
+- ユーザーは `mask-icon-xxx` クラスを使うだけで即座に表示可能
+- シンプルで確実な実装
+
 #### `icon:preview` - プレビュー HTML 生成
 
 ```bash
@@ -149,6 +167,67 @@ npx nubui icon:build
 1. `icon:masks` を実行
 2. `icon:preview` を実行
 3. ブラウザで自動的に開く
+
+#### `icon:unused` - 未使用アイコン検出
+
+```bash
+npx nubui icon:unused [options]
+```
+
+**オプション:**
+- `--search-dir, -d <path>`: 検索対象ディレクトリ (デフォルト: `./`)
+  - 複数指定可能: `-d ./src -d ./pages`
+- `--include <patterns>`: 対象ファイル拡張子 (デフォルト: `*.ts,*.tsx,*.astro,*.vue,*.jsx,*.js`)
+  - 例: `--include "*.tsx,*.astro"`
+- `--exclude <patterns>`: 除外ファイル (デフォルト: `node_modules,dist,.git`)
+  - 例: `--exclude "*.test.ts,*.spec.ts"`
+- `--remove`: 未使用アイコンの SVG ファイルを自動削除
+- `--check`: 未使用アイコンがあれば終了コード 1 を返す（CI/CD 用）
+- `--help, -h`: ヘルプ表示
+
+**使用例:**
+
+```bash
+# プロジェクト全体で未使用アイコンを検出
+npx nubui icon:unused
+
+# src/components ディレクトリのみ検索
+npx nubui icon:unused --search-dir ./src/components
+
+# テストファイルを除外して検索
+npx nubui icon:unused --exclude "*.test.ts,*.spec.ts"
+
+# 未使用アイコンを自動削除
+npx nubui icon:unused --remove
+
+# CI/CD パイプラインで未使用アイコンをチェック
+npx nubui icon:unused --check
+if [ $? -ne 0 ]; then echo "Unused icons found!"; exit 1; fi
+```
+
+**出力例:**
+
+```
+🔍 Searching for icon usage in:
+  - Current directory (recursively)
+
+File patterns:
+  Include: *.ts, *.tsx, *.astro, *.vue, *.jsx, *.js
+  Exclude: node_modules, dist, .git
+
+Generated icons: 50
+Used icons: 45
+Unused icons: 5
+
+❌ Unused icons:
+  - old-icon
+  - deprecated-feature
+  - test-icon
+  - temporary
+  - future-use
+
+💡 Tip: Run 'npx nubui icon:unused --remove' to delete unused SVG files
+```
 
 #### `icon:clean` - クリーンアップ
 
