@@ -1,122 +1,52 @@
 ---
-import { Icon, Button } from '@photosynthesic/nubui/astro';
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>nubui Astro Icon & Button Test</title>
-    <style>
-      body {
-        font-family: system-ui, sans-serif;
-        padding: 2rem;
-      }
-      h1 {
-        color: #333;
-      }
-      h2 {
-        color: #666;
-        margin-top: 2rem;
-      }
-      .demo {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin: 1rem 0;
-      }
-      button, a[role="button"] {
-        cursor: pointer;
-        font-family: inherit;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>nubui Components Test</h1>
+<Layout title="nubui Icon System Test">
+  <h1>nubui Icon System Test</h1>
 
-    <section>
-      <h2>Icon Component - Mask Mode (default)</h2>
-      <div class="demo">
-        <Icon name="heart" size={24} color="red-500" />
-        <Icon name="star" size={24} color="yellow-500" />
-      </div>
+  <section>
+    <h2>Generated Icon Classes</h2>
+    <p>nubui generates Tailwind CSS classes for SVG icons. Use the <code>mask-icon-{name}</code> class to display icons.</p>
 
-      <h2>Icon Component - Inline Mode</h2>
-      <div class="demo">
-        <Icon name="star" mode="inline" size={32} color="#fbbf24" />
-      </div>
+    <h3>Basic Icon Usage</h3>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <span class="mask-icon-heart w-6 h-6 text-red-500 inline-block"></span>
+      <span class="mask-icon-star w-6 h-6 text-yellow-500 inline-block"></span>
+      <span class="mask-icon-heart w-8 h-8 text-blue-500 inline-block"></span>
+    </div>
 
-      <h2>Icon Component - IMG Mode</h2>
-      <div class="demo">
-        <Icon name="heart" mode="img" size={48} alt="Heart icon" />
-      </div>
-    </section>
+    <h3>Icon Color Variations</h3>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <span class="mask-icon-star w-6 h-6 text-gray-400 inline-block"></span>
+      <span class="mask-icon-star w-6 h-6 text-gray-600 inline-block"></span>
+      <span class="mask-icon-star w-6 h-6 text-gray-800 inline-block"></span>
+    </div>
+  </section>
 
-    <section>
-      <h2>Button Component - Basic Types</h2>
-      <div class="demo">
-        <Button text="Basic" />
-        <Button text="Primary" type="primary" />
-        <Button text="Danger" type="danger" />
-      </div>
+  <section>
+    <h2>Icon Component Pattern</h2>
+    <p>Create reusable icon components for your framework:</p>
 
-      <h2>Button Component - Sizes</h2>
-      <div class="demo">
-        <Button text="Small" size="SM" />
-        <Button text="Medium" size="MD" />
-        <Button text="Large" size="LG" />
-      </div>
+    <h3>Example Icon Component Usage</h3>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <span class="mask-icon-heart w-6 h-6 text-red-500 inline-block" aria-label="Heart icon"></span>
+      <span class="mask-icon-star w-6 h-6 text-yellow-500 inline-block" aria-label="Star icon"></span>
+    </div>
+  </section>
 
-      <h2>Button Component - Shapes</h2>
-      <div class="demo">
-        <Button text="Default" shape="default" />
-        <Button text="Round" shape="round" />
-        <Button text="O" shape="circle" />
-      </div>
+  <section>
+    <h2>Button with Icon Pattern</h2>
+    <p>Build buttons that include icons using the generated classes:</p>
 
-      <h2>Button Component - States</h2>
-      <div class="demo">
-        <Button text="Normal" type="primary" />
-        <Button text="Disabled" type="primary" disabled />
-        <Button text="Block" type="primary" block={true} />
-      </div>
+    <button style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background-color: #2563eb; color: white; border-radius: 0.375rem; border: none; cursor: pointer;">
+      <span class="mask-icon-heart w-4 h-4 inline-block"></span>
+      Like
+    </button>
 
-      <h2>Button Component - With Icons</h2>
-      <div class="demo">
-        <Button text="Heart" icon="heart" iconPosition="start" />
-        <Button text="Star" icon="star" iconPosition="end" type="primary" />
-      </div>
-
-      <h2>Button Component - Anchor Links</h2>
-      <div class="demo">
-        <Button text="Link" href="#section" />
-        <Button text="External" href="https://example.com" target="_blank" type="primary" />
-        <Button text="Disabled Link" href="#" disabled />
-      </div>
-
-      <h2>Button Component - Form Types</h2>
-      <div class="demo">
-        <Button text="Submit" htmlType="submit" />
-        <Button text="Reset" htmlType="reset" />
-        <Button text="Button" htmlType="button" />
-      </div>
-
-      <h2>Button Component - Complex Examples</h2>
-      <div class="demo">
-        <Button
-          text="Large Primary with Icon"
-          type="primary"
-          size="LG"
-          icon="heart"
-          iconPosition="start"
-        />
-        <Button
-          text="Small Rounded Danger"
-          type="danger"
-          size="SM"
-          shape="round"
-        />
-      </div>
-    </section>
-  </body>
-</html>
+    <button style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background-color: #dc2626; color: white; border-radius: 0.375rem; border: none; cursor: pointer; margin-left: 0.5rem;">
+      <span class="mask-icon-star w-4 h-4 inline-block"></span>
+      Favorite
+    </button>
+  </section>
+</Layout>

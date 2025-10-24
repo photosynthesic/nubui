@@ -3,13 +3,6 @@
  * @fileoverview Main exports for the icon system
  */
 
-// Main icon creation function
-export { createIcon } from "./icon";
-
-// Icon configuration
-export { configureIcon, resetIconConfig } from "./config";
-export type { IconConfig } from "./config";
-
 // Icon utilities
 export {
   getAvailableIcons,
@@ -26,10 +19,3 @@ export {
   cleanSvgContent,
   extractSvgDimensions,
 } from "./svg-utils";
-
-// Mask generator (CLI functionality)
-// export { generateIconMasks } from "./icon-mask-generator";
-// export type { MaskGeneratorConfig } from "./icon-mask-generator";
-
-// Types
-export type { IconArgs, IconOutputMode } from "./types";

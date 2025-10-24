@@ -8,7 +8,7 @@
     "build": "astro build"
   },
   "dependencies": {
-    "@photosynthesic/nubui": "file:../../photosynthesic-nubui-0.1.3.tgz",
+    "@photosynthesic/nubui": "file:../../photosynthesic-nubui-0.1.4.tgz",
     "tailwindcss": "^3.3.0"
   },
   "devDependencies": {
