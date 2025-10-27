@@ -129,57 +129,12 @@ function scanIcons(iconDir) {
     .map((file) => path.basename(file, ".svg"));
 }
 
-/**
- * Convert SCSS to basic CSS (simplified version)
- * This is a very basic converter - for production, use a proper SCSS compiler
- */
-function scssToCSS(scssContent) {
-  // Extract icon data map
-  const iconMapMatch = scssContent.match(/\$icon-masks:\s*\(([\s\S]*?)\);/);
-  if (!iconMapMatch) {
-    return '';
-  }
-
-  const iconMapContent = iconMapMatch[1];
-  const icons = {};
-
-  // Parse icon entries
-  const iconRegex = /'([^']+)':\s*'([^']+)'/g;
-  let match;
-  while ((match = iconRegex.exec(iconMapContent)) !== null) {
-    icons[match[1]] = match[2];
-  }
-
-  // Generate CSS
-  let css = `/* Auto-generated icon mask utilities */\n\n`;
-
-  // Add base styles
-  css += `.mask-icon-base {
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  background-color: currentColor;
-}\n\n`;
-
-  // Generate icon classes
-  for (const [name, data] of Object.entries(icons)) {
-    css += `.mask-icon-${name} {
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  background-color: currentColor;
-  mask-image: url("data:image/svg+xml;base64,${data}");
-}\n\n`;
-  }
-
-  return css;
-}
 
 /**
- * Load generated SCSS and convert to CSS
+ * Load generated mask file (CSS or SCSS)
  */
 function loadIconCSS() {
-  // Read SCSS path from cache
+  // Read file path from cache
   const cache = readCacheFile();
   if (!cache) {
     console.error("❌ No build cache found. Please run 'npx nubui icon:masks' first.");
@@ -192,19 +147,45 @@ function loadIconCSS() {
   }
 
   if (!fs.existsSync(cache.outputPath)) {
-    console.error(`❌ SCSS file not found: ${cache.outputPath}`);
+    console.error(`❌ Mask file not found: ${cache.outputPath}`);
     console.error("Please run 'npx nubui icon:masks' to regenerate.");
     process.exit(1);
   }
 
-  const scssContent = fs.readFileSync(cache.outputPath, 'utf-8');
-  return scssToCSS(scssContent);
+  // Read the mask file
+  const maskContent = fs.readFileSync(cache.outputPath, 'utf-8');
+
+  // Check if it's SCSS format (contains SCSS-specific syntax)
+  if (maskContent.includes('@mixin') || maskContent.includes('$icon-masks')) {
+    console.warn("⚠️  SCSS format detected. Preview may not work correctly.");
+    console.warn("ℹ️  For preview generation, use CSS format: --format css");
+    console.warn("ℹ️  You can still use SCSS format for your build pipeline.\n");
+  }
+
+  return maskContent;
 }
 
 /**
  * Generate HTML content
  */
-function generateHTML(icons, iconCSS) {
+function generateHTML(icons, iconCSS, outputPath) {
+  // Copy CSS file to same directory as HTML for reference
+  const outputDir = path.dirname(outputPath);
+  const cssFileName = 'icon-masks.css';
+  const cssFilePath = path.join(outputDir, cssFileName);
+
+  // Write the CSS file
+  try {
+    // Ensure output directory exists
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+    fs.writeFileSync(cssFilePath, iconCSS, 'utf-8');
+    console.log(`✅ Icon CSS file saved: ${cssFilePath}`);
+  } catch (error) {
+    console.warn(`⚠️  Failed to save CSS file: ${error.message}`);
+  }
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -212,9 +193,7 @@ function generateHTML(icons, iconCSS) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nubui Icon Preview</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-${iconCSS}
-  </style>
+  <link rel="stylesheet" href="${cssFileName}">
 </head>
 <body class="bg-gray-50 min-h-screen">
   <div class="container mx-auto px-4 py-8">
@@ -396,7 +375,7 @@ function main() {
   const iconCSS = loadIconCSS();
   console.log(`📝 Icon CSS loaded`);
 
-  const html = generateHTML(icons, iconCSS);
+  const html = generateHTML(icons, iconCSS, args.outputPath);
 
   // Create output directory if it doesn't exist
   const outputDir = path.dirname(args.outputPath);

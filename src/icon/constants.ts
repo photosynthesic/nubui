@@ -14,9 +14,9 @@ export const DEFAULT_ICON_SOURCE_DIR = "./src/assets/icon";
 export const DEFAULT_OPTIMIZED_ICON_DIR = "./src/assets/icon/format";
 
 /**
- * Default output path for generated SCSS file
+ * Default output path for generated mask file (CSS format by default)
  */
-export const DEFAULT_SCSS_OUTPUT_PATH = "./src/assets/scss/_icon-masks.scss";
+export const DEFAULT_SCSS_OUTPUT_PATH = "./src/assets/css/icon-masks.css";
 
 /**
  * Default output path for preview HTML file

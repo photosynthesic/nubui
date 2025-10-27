@@ -7,6 +7,12 @@ lib/
 *.tsbuildinfo
 .nubui-cache.json
 
+# Generated icon files
+docs/icon-masks.css
+docs/icon-preview.html
+src/assets/css/icon-masks.css
+src/assets/icon/format/
+
 # npm package archives
 *.tgz
 

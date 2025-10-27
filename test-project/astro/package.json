@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build"
+    "icon:build": "nubui icon:build --format css --output ./src/assets/css/icon-masks.css",
+    "build": "npm run icon:build && astro build"
   },
   "dependencies": {
     "@photosynthesic/nubui": "file:../../photosynthesic-nubui-0.1.4.tgz",
@@ -13,6 +14,7 @@
   },
   "devDependencies": {
     "@astrojs/tailwind": "^5.0.0",
-    "astro": "^4.0.0"
+    "astro": "^4.0.0",
+    "sass-embedded": "^1.93.2"
   }
 }

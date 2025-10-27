@@ -121,8 +121,19 @@ function iconBuild(args = []) {
   const generateMasksPath = path.join(__dirname, "generate-masks.js");
   const generatePreviewPath = path.join(__dirname, "generate-preview.js");
 
-  // Pass arguments to subcommands
+  // Separate arguments: format/icon-dir args for masks, output args only for preview
   const argsString = args.join(" ");
+
+  // Filter out --format, -f, --output, and -o from preview args
+  // (format and output are only for mask generation)
+  const previewArgs = args
+    .filter((arg, i) => {
+      if (arg === '--format' || arg === '-f') return false;
+      if (arg === '--output' || arg === '-o') return false;
+      if (i > 0 && (args[i - 1] === '--format' || args[i - 1] === '-f' || args[i - 1] === '--output' || args[i - 1] === '-o')) return false;
+      return true;
+    })
+    .join(" ");
 
   // Step 1: Generate masks
   console.log("📝 Step 1/4: Generating icon masks...");
@@ -138,7 +149,7 @@ function iconBuild(args = []) {
   // Step 2: Generate preview
   console.log("📄 Step 2/4: Generating preview page...");
   try {
-    execSync(`node "${generatePreviewPath}" ${argsString}`, { stdio: "inherit" });
+    execSync(`node "${generatePreviewPath}" ${previewArgs}`, { stdio: "inherit" });
   } catch (error) {
     console.error("❌ Failed to generate preview");
     process.exit(1);

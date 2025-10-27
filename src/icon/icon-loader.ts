@@ -7,7 +7,6 @@ import * as fs from "fs";
 import * as path from "path";
 import type { IconOutputMode } from "./types.js";
 import { DEFAULT_ICON_DIRECTORIES } from "./constants.js";
-import { getIconConfig } from "./config.js";
 
 /**
  * Cache for loaded SVG content to avoid repeated file reads
@@ -21,16 +20,10 @@ let availableIconsCache: string[] | null = null;
 
 /**
  * Get the icon directory path
- * Priority: config > environment variable > default directories
+ * Priority: environment variable > default directories
  */
 function getIconDirectory(): string {
-  // Check config first
-  const config = getIconConfig();
-  if (config.directory && fs.existsSync(config.directory)) {
-    return config.directory;
-  }
-
-  // Check environment variable
+  // Check environment variable first
   const envIconDir = process.env.NUBUI_ICON_DIR;
   if (envIconDir && fs.existsSync(envIconDir)) {
     return envIconDir;

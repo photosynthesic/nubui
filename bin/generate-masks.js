@@ -19,6 +19,7 @@ function parseArgs() {
     const result = {
         includePseudoElements: true,
         optimizeSvg: true,
+        format: 'css',
         showHelp: false,
         showVersion: false,
     };
@@ -34,6 +35,16 @@ function parseArgs() {
             case '--output':
             case '-o':
                 result.outputPath = args[++i];
+                break;
+            case '--format':
+            case '-f':
+                const format = args[++i];
+                if (format === 'css' || format === 'scss') {
+                    result.format = format;
+                } else {
+                    console.error(`Invalid format: ${format}. Must be 'css' or 'scss'`);
+                    process.exit(1);
+                }
                 break;
             case '--no-pseudo':
                 result.includePseudoElements = false;
@@ -69,7 +80,7 @@ function parseArgs() {
  */
 function showHelp() {
     console.log(`
-@photosynthesic/nubui - Generate SCSS mask utilities
+@photosynthesic/nubui - Generate icon mask utilities
 
 USAGE:
   npx @photosynthesic/nubui generate-masks [OPTIONS]
@@ -78,8 +89,11 @@ OPTIONS:
   -i, --icon-dir <path>       SVG icon directory path
                               (default: ${DEFAULT_ICON_SOURCE_DIR})
 
-  -o, --output <path>         Output SCSS file path
+  -o, --output <path>         Output file path (CSS or SCSS)
                               (default: ${DEFAULT_SCSS_OUTPUT_PATH})
+
+  -f, --format <format>       Output format: 'css' or 'scss'
+                              (default: css)
 
   --no-pseudo                 Disable pseudo-element variants (::before, ::after)
 
@@ -93,11 +107,11 @@ OPTIONS:
   -v, --version               Show version number
 
 EXAMPLES:
-  # Basic usage (with SVG optimization)
+  # Basic usage (CSS format)
   npx @photosynthesic/nubui generate-masks
 
-  # Custom paths
-  npx @photosynthesic/nubui generate-masks --icon-dir ./assets/icons --output ./styles/_icons.scss
+  # Custom paths with SCSS output
+  npx @photosynthesic/nubui generate-masks --icon-dir ./assets/icons --output ./styles/_icons.scss --format scss
 
   # Disable SVG optimization
   npx @photosynthesic/nubui generate-masks --no-optimize
@@ -145,6 +159,7 @@ function main() {
             ...(args.outputPath && { outputPath: args.outputPath }),
             includePseudoElements: args.includePseudoElements,
             optimizeSvg: args.optimizeSvg,
+            format: args.format,
         };
 
         // Load custom svgo config if provided
