@@ -10,8 +10,6 @@ A lightweight, framework-agnostic tool for managing custom SVG icons and generat
 - **⚡ CLI Automation**: `icon:build` command for one-step workflow with preview
 - **👁️ Interactive Preview**: Visual preview page for generated icons
 - **🔍 SVGO Integration**: Automatic SVG optimization (configurable)
-- **🏷️ Full TypeScript Support**: Type-safe development experience
-- **🚀 Framework Support**: Vue, React, Svelte, Astro, vanilla JavaScript, and more
 
 ## Installation
 
@@ -34,121 +32,133 @@ This generates CSS mask utilities from your SVG icons and opens an interactive p
 ### 2. Use Icons in HTML
 
 ```html
-<!-- Basic icon -->
 <span class="mask-icon-heart w-6 h-6 text-red-500"></span>
-
-<!-- Icon in button -->
-<button class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded">
-  <span class="mask-icon-star w-5 h-5"></span>
-  Favorite
-</button>
 ```
 
 ## CLI Commands
 
 ```bash
 npx nubui icon:build    # Generate masks + preview and open browser
-npx nubui icon:masks    # Generate CSS masks only
+npx nubui icon:masks    # Generate CSS/SCSS masks only
 npx nubui icon:preview  # Generate preview HTML only
 npx nubui icon:clean    # Remove generated files
 npx nubui --help        # Show all commands
 ```
 
-### icon:masks Options
+### icon:build & icon:masks Options
 
 ```bash
+npx nubui icon:build [OPTIONS]
 npx nubui icon:masks [OPTIONS]
 
 OPTIONS:
   -i, --icon-dir <path>   SVG icon directory path
                           (default: ./src/assets/icon)
 
-  -o, --output <path>     Output SCSS file path
-                          (default: ./src/assets/scss/_icon-masks.scss)
+  -o, --output <path>     Output CSS/SCSS file path
+                          (default: ./src/assets/css/icon-masks.css)
+
+  -f, --format <format>   Output format: 'css' or 'scss'
+                          (default: css)
 
   --no-optimize           Skip SVG optimization (svgo)
 
   -h, --help              Show help message
+
+EXAMPLES:
+  # Generate CSS format (default)
+  npx nubui icon:build
+
+  # Generate SCSS format
+  npx nubui icon:build --format scss --output ./src/assets/scss/_icon-masks.scss
 ```
 
 ## Development Workflow
 
-1. **Install the package**
+See **Quick Start** above for basic setup. For detailed integration with your build system:
 
-   ```bash
-   npm install @photosynthesic/nubui
-   ```
+### Using CSS Format (Default)
 
-2. **Add SVG icons to your project**
+The default CSS format works great with any build system that supports CSS imports:
 
-   ```
-   src/assets/icon/
-   ├── heart.svg
-   ├── star.svg
-   └── home.svg
-   ```
+```bash
+npx nubui icon:build
+# Generates: src/assets/css/icon-masks.css
+```
 
-3. **Generate masks and preview**
+Import in your main CSS file:
 
-   ```bash
-   npx nubui icon:build
-   ```
+```css
+@import "./assets/css/icon-masks.css";
+```
 
-4. **Import generated SCSS**
+### Using SCSS Format
 
-   ```scss
-   // main.scss
-   @import "./assets/scss/_icon-masks";
-   ```
+If your project uses SCSS, generate in SCSS format:
 
-5. **Use in your components**
+```bash
+npx nubui icon:build --format scss --output ./src/assets/scss/_icon-masks.scss
+```
 
-   ```html
-   <span class="mask-icon-heart w-6 h-6 text-red-500"></span>
-   ```
+Import in your main SCSS file:
+
+```scss
+@import "./assets/scss/_icon-masks";
+```
+
+### Customizing Icon Directory
+
+By default, nubui looks for SVG files in `src/assets/icon/`. You can customize this:
+
+```bash
+npx nubui icon:build --icon-dir ./my-custom-icons
+```
 
 ## Framework Integration
 
 ### Astro
 
+Example: Create a reusable Icon component
+
 ```astro
 ---
-// No imports needed - just use the CSS classes
+// components/Icon.astro
+interface Props {
+  name: string;
+  size?: 'sm' | 'md' | 'lg';
+  class?: string;
+}
+
+const { name, size = 'md', class: className } = Astro.props;
+const sizeMap = { sm: 'w-4 h-4', md: 'w-6 h-6', lg: 'w-8 h-8' };
+---
+
+<span
+  class:list={[
+    `mask-icon-${name}`,
+    sizeMap[size],
+    'inline-block',
+    className
+  ]}
+/>
+```
+
+Usage example:
+
+```astro
+---
+import Icon from '../components/Icon.astro';
 ---
 
 <button class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded">
-  <span class="mask-icon-star w-5 h-5"></span>
+  <Icon name="star" size="md" class="text-white" />
   Favorite
 </button>
 ```
 
-### React
-
-```tsx
-export function FavoriteButton() {
-  return (
-    <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded">
-      <span className="mask-icon-star w-5 h-5"></span>
-      Favorite
-    </button>
-  );
-}
-```
-
-### Vue
-
-```vue
-<template>
-  <button class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded">
-    <span class="mask-icon-star w-5 h-5"></span>
-    Favorite
-  </button>
-</template>
-```
-
 ## Icon Rendering Modes
 
-nubui supports three ways to use your icons:
+nubui supports three ways to use your icons. You can explore each mode interactively in the **icon preview** page (generated by `icon:build`):
 
 ### 1. Mask Mode (Default, Recommended)
 
@@ -157,6 +167,7 @@ nubui supports three ways to use your icons:
 ```
 
 **Features:**
+
 - `currentColor` support for dynamic theming
 - Tailwind CSS `text-*` classes for color
 - Single `<span>` element in DOM
@@ -164,11 +175,27 @@ nubui supports three ways to use your icons:
 
 ### 2. Inline Mode
 
-When you need to animate or style individual SVG paths, use inline SVG directly.
+Embed SVG directly in HTML for per-path styling and animations.
+
+**Features:**
+
+- Full control over SVG attributes
+- Ability to animate individual paths
+- Per-element color control
 
 ### 3. IMG Mode
 
-For static references that can be cached by the browser.
+Reference external SVG files via `<img>` tag for cleaner markup.
+
+**Features:**
+
+- Browser caching of SVG files
+- Separate SVG file management
+- CSS-based styling
+
+---
+
+**Tip:** Run `npx nubui icon:build` and check the generated preview page to see code examples for each mode with your actual icons.
 
 ## Requirements
 

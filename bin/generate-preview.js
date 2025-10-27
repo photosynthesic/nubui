@@ -129,6 +129,26 @@ function scanIcons(iconDir) {
     .map((file) => path.basename(file, ".svg"));
 }
 
+/**
+ * Load SVG content for each icon
+ */
+function loadSVGContent(iconDir, iconNames) {
+  const svgContent = {};
+
+  iconNames.forEach(iconName => {
+    const svgPath = path.join(iconDir, `${iconName}.svg`);
+    try {
+      if (fs.existsSync(svgPath)) {
+        svgContent[iconName] = fs.readFileSync(svgPath, 'utf-8').trim();
+      }
+    } catch (error) {
+      console.warn(`⚠️  Failed to load SVG for ${iconName}: ${error.message}`);
+    }
+  });
+
+  return svgContent;
+}
+
 
 /**
  * Load generated mask file (CSS or SCSS)
@@ -168,7 +188,7 @@ function loadIconCSS() {
 /**
  * Generate HTML content
  */
-function generateHTML(icons, iconCSS, outputPath) {
+function generateHTML(icons, iconCSS, outputPath, svgContent) {
   // Copy CSS file to same directory as HTML for reference
   const outputDir = path.dirname(outputPath);
   const cssFileName = 'icon-masks.css';
@@ -233,6 +253,35 @@ function generateHTML(icons, iconCSS, outputPath) {
       </div>
     </div>
 
+    <!-- Icon Rendering Modes Documentation -->
+    <section class="bg-white rounded-lg shadow-sm p-6 mb-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">Icon Rendering Modes</h2>
+      <p class="text-gray-600 mb-4">Icons can be used in multiple ways. Click any icon to see code examples:</p>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="text-sm">
+          <h3 class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+            <span class="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
+            Mask Mode
+          </h3>
+          <p class="text-gray-600">CSS mask-image with Tailwind classes and dynamic colors.</p>
+        </div>
+        <div class="text-sm">
+          <h3 class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+            <span class="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
+            Inline SVG
+          </h3>
+          <p class="text-gray-600">Embed SVG directly in HTML for full control.</p>
+        </div>
+        <div class="text-sm">
+          <h3 class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+            <span class="inline-block w-2 h-2 bg-purple-500 rounded-full"></span>
+            IMG Tag
+          </h3>
+          <p class="text-gray-600">Reference external SVG files via img tag.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- Icon Grid -->
     <div id="iconGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-6">
       <!-- Icons will be dynamically inserted here -->
@@ -240,8 +289,8 @@ function generateHTML(icons, iconCSS, outputPath) {
 
     <!-- Modal for Code Sample -->
     <div id="codeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6">
-        <div class="flex justify-between items-start mb-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6">
+        <div class="flex justify-between items-start mb-6">
           <h3 class="text-xl font-bold text-gray-900" id="modalTitle">Icon Code</h3>
           <button id="closeModal" class="text-gray-400 hover:text-gray-600">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,8 +298,25 @@ function generateHTML(icons, iconCSS, outputPath) {
             </svg>
           </button>
         </div>
+
+        <!-- Mode Tabs -->
+        <div class="flex gap-2 mb-4 border-b border-gray-200">
+          <button class="mode-tab px-4 py-2 font-medium text-sm border-b-2 border-blue-500 text-blue-600 cursor-pointer" data-mode="mask">
+            Mask Mode
+          </button>
+          <button class="mode-tab px-4 py-2 font-medium text-sm border-b-2 border-transparent text-gray-600 hover:text-gray-900 cursor-pointer" data-mode="inline">
+            Inline SVG
+          </button>
+          <button class="mode-tab px-4 py-2 font-medium text-sm border-b-2 border-transparent text-gray-600 hover:text-gray-900 cursor-pointer" data-mode="img">
+            IMG Tag
+          </button>
+        </div>
+
+        <!-- Code Content -->
         <pre id="codeContent" class="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm"><code></code></pre>
-        <button id="copyCode" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">
+
+        <!-- Buttons -->
+        <button id="copyCode" class="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium">
           Copy to Clipboard
         </button>
       </div>
@@ -259,9 +325,45 @@ function generateHTML(icons, iconCSS, outputPath) {
 
   <script>
     const ICONS = ${JSON.stringify(icons)};
+    const SVG_CONTENT = ${JSON.stringify(svgContent)};
 
     let currentSize = 'w-6 h-6';
     let currentColor = 'text-gray-700';
+    let currentMode = 'mask';
+    let currentIconName = '';
+
+    function generateMaskCode(iconName) {
+      return \`<span class="mask-icon-\${iconName} \${currentSize} \${currentColor}"></span>\`;
+    }
+
+    function generateInlineCode(iconName) {
+      const svgCode = SVG_CONTENT[iconName] || '<svg><!-- SVG content --></svg>';
+      return svgCode;
+    }
+
+    function generateImgCode(iconName) {
+      const sizeMap = {
+        'w-4 h-4': '16',
+        'w-6 h-6': '24',
+        'w-8 h-8': '32',
+        'w-12 h-12': '48'
+      };
+      const size = sizeMap[currentSize] || '24';
+      return \`<img src="icons/\${iconName}.svg" alt="\${iconName}" width="\${size}" height="\${size}" />\`;
+    }
+
+    function getCodeForMode(iconName, mode) {
+      switch(mode) {
+        case 'mask':
+          return generateMaskCode(iconName);
+        case 'inline':
+          return generateInlineCode(iconName);
+        case 'img':
+          return generateImgCode(iconName);
+        default:
+          return generateMaskCode(iconName);
+      }
+    }
 
     function renderIcons() {
       const grid = document.getElementById('iconGrid');
@@ -292,17 +394,48 @@ function generateHTML(icons, iconCSS, outputPath) {
       });
     }
 
+    function updateCodeDisplay(iconName, mode) {
+      const codeContent = document.getElementById('codeContent');
+      const code = getCodeForMode(iconName, mode);
+      codeContent.querySelector('code').textContent = code;
+    }
+
     function showCodeModal(iconName) {
       const modal = document.getElementById('codeModal');
       const title = document.getElementById('modalTitle');
-      const codeContent = document.getElementById('codeContent');
+
+      currentIconName = iconName;
+      currentMode = 'mask';
 
       title.textContent = \`\${iconName} - Code Sample\`;
 
-      const code = \`<!-- Mask mode -->\\n<span class="mask-icon-\${iconName} \${currentSize} \${currentColor}"></span>\`;
+      // Reset mode tabs
+      document.querySelectorAll('.mode-tab').forEach(tab => {
+        tab.classList.remove('border-blue-500', 'text-blue-600');
+        tab.classList.add('border-transparent', 'text-gray-600');
+      });
+      document.querySelector('[data-mode="mask"]').classList.add('border-blue-500', 'text-blue-600');
+      document.querySelector('[data-mode="mask"]').classList.remove('border-transparent', 'text-gray-600');
 
-      codeContent.querySelector('code').textContent = code;
+      updateCodeDisplay(iconName, 'mask');
       modal.classList.remove('hidden');
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+
+      // Update tab styling
+      document.querySelectorAll('.mode-tab').forEach(tab => {
+        if (tab.dataset.mode === mode) {
+          tab.classList.remove('border-transparent', 'text-gray-600');
+          tab.classList.add('border-blue-500', 'text-blue-600');
+        } else {
+          tab.classList.remove('border-blue-500', 'text-blue-600');
+          tab.classList.add('border-transparent', 'text-gray-600');
+        }
+      });
+
+      updateCodeDisplay(currentIconName, mode);
     }
 
     // Event Listeners
@@ -310,12 +443,24 @@ function generateHTML(icons, iconCSS, outputPath) {
     document.getElementById('sizeSelect').addEventListener('change', (e) => {
       currentSize = e.target.value;
       renderIcons();
+      if (currentIconName) {
+        updateCodeDisplay(currentIconName, currentMode);
+      }
     });
 
     document.querySelectorAll('.color-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         currentColor = btn.dataset.color;
         renderIcons();
+        if (currentIconName) {
+          updateCodeDisplay(currentIconName, currentMode);
+        }
+      });
+    });
+
+    document.querySelectorAll('.mode-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        switchMode(tab.dataset.mode);
       });
     });
 
@@ -375,7 +520,10 @@ function main() {
   const iconCSS = loadIconCSS();
   console.log(`📝 Icon CSS loaded`);
 
-  const html = generateHTML(icons, iconCSS, args.outputPath);
+  const svgContent = loadSVGContent(iconDir, icons);
+  console.log(`✅ SVG content loaded`);
+
+  const html = generateHTML(icons, iconCSS, args.outputPath, svgContent);
 
   // Create output directory if it doesn't exist
   const outputDir = path.dirname(args.outputPath);
