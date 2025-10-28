@@ -188,7 +188,7 @@ function loadIconCSS() {
 /**
  * Generate HTML content
  */
-function generateHTML(icons, iconCSS, outputPath, svgContent) {
+function generateHTML(icons, iconCSS, outputPath, svgContent, optimizedIconDir) {
   // Copy CSS file to same directory as HTML for reference
   const outputDir = path.dirname(outputPath);
   const cssFileName = 'icon-masks.css';
@@ -326,6 +326,7 @@ function generateHTML(icons, iconCSS, outputPath, svgContent) {
   <script>
     const ICONS = ${JSON.stringify(icons)};
     const SVG_CONTENT = ${JSON.stringify(svgContent)};
+    const OPTIMIZED_ICON_DIR = ${JSON.stringify(optimizedIconDir)};
 
     let currentSize = 'w-6 h-6';
     let currentColor = 'text-gray-700';
@@ -349,7 +350,7 @@ function generateHTML(icons, iconCSS, outputPath, svgContent) {
         'w-12 h-12': '48'
       };
       const size = sizeMap[currentSize] || '24';
-      return \`<img src="icons/\${iconName}.svg" alt="\${iconName}" width="\${size}" height="\${size}" />\`;
+      return \`<img src="\${OPTIMIZED_ICON_DIR}/\${iconName}.svg" alt="\${iconName}" width="\${size}" height="\${size}" />\`;
     }
 
     function getCodeForMode(iconName, mode) {
@@ -523,7 +524,11 @@ function main() {
   const svgContent = loadSVGContent(iconDir, icons);
   console.log(`✅ SVG content loaded`);
 
-  const html = generateHTML(icons, iconCSS, args.outputPath, svgContent);
+  // Get optimizedIconDir from cache
+  const cache = readCacheFile();
+  const optimizedIconDir = cache?.optimizedIconDir || iconDir;
+
+  const html = generateHTML(icons, iconCSS, args.outputPath, svgContent, optimizedIconDir);
 
   // Create output directory if it doesn't exist
   const outputDir = path.dirname(args.outputPath);

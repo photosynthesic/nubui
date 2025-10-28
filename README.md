@@ -173,6 +173,17 @@ nubui supports three ways to use your icons. You can explore each mode interacti
 - Single `<span>` element in DOM
 - Perfect compatibility with pseudo-elements (`::before`, `::after`)
 
+**Browser Support:**
+
+Uses CSS `mask-image` which is supported in all modern browsers:
+
+- Chrome 55+ (2016)
+- Firefox 53+ (2017)
+- Safari 15.4+ (2022)
+- Edge 79+ (2020)
+
+**Note:** Ancient browsers (IE 11, Safari <15.4) are not supported. If you need to support older browsers, use Inline SVG or IMG Mode instead.
+
 ### 2. Inline Mode
 
 Embed SVG directly in HTML for per-path styling and animations.
@@ -202,10 +213,6 @@ Reference external SVG files via `<img>` tag for cleaner markup.
 - **Node.js**: 18.0.0 or higher
 - **TypeScript**: 5.0.0 or higher (for development)
 - **Tailwind CSS**: 3.0.0 or higher
-
-## For Full Documentation
-
-See [spec.md](./spec.md) for complete package structure, configuration options, and implementation examples.
 
 ## License
 
