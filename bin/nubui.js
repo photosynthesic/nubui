@@ -16,6 +16,14 @@ const {
 } = require("../lib/icon/constants.cjs");
 
 const COMMANDS = {
+  "build": {
+    description: "Generate masks + preview and open in browser",
+    handler: iconBuild,
+  },
+  "icon:build": {
+    description: "Generate masks + preview and open in browser",
+    handler: iconBuild,
+  },
   "icon:masks": {
     description: "Generate icon mask CSS utilities",
     script: "./bin/generate-masks.js",
@@ -24,12 +32,8 @@ const COMMANDS = {
     description: "Generate icon preview HTML page",
     script: "./bin/generate-preview.js",
   },
-  "icon:build": {
-    description: "Generate masks, preview, and open in browser",
-    handler: iconBuild,
-  },
   "icon:clean": {
-    description: "Remove generated icon files (SCSS and preview HTML)",
+    description: "Remove generated icon files",
     handler: iconClean,
   },
 };
@@ -42,18 +46,20 @@ Usage:
   npx nubui <command> [options]
 
 Commands:
-  icon:masks      Generate icon mask CSS utilities
-  icon:preview    Generate icon preview HTML page
-  icon:build      Generate masks + preview and open in browser
-  icon:clean      Remove generated icon files
+  build              Generate masks + preview and open in browser
+  icon:build         (alias for 'build')
+  icon:masks         Generate icon mask CSS utilities
+  icon:preview       Generate icon preview HTML page
+  icon:clean         Remove generated icon files
 
 Options:
-  --help, -h      Show this help message
+  --help, -h         Show this help message
 
 Examples:
+  npx nubui build
+  npx nubui icon:build
   npx nubui icon:masks
   npx nubui icon:preview --output public/preview.html
-  npx nubui icon:build
   npx nubui icon:clean
 
 For command-specific help:

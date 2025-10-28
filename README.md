@@ -24,7 +24,7 @@ npm install @photosynthesic/nubui
 Place your SVG files in `src/assets/icon/` and run:
 
 ```bash
-npx nubui icon:build
+npx nubui build
 ```
 
 This generates CSS mask utilities from your SVG icons and opens an interactive preview.
@@ -37,18 +37,25 @@ This generates CSS mask utilities from your SVG icons and opens an interactive p
 
 ## CLI Commands
 
+### Main Command
+
 ```bash
-npx nubui icon:build    # Generate masks + preview and open browser
-npx nubui icon:masks    # Generate CSS/SCSS masks only
-npx nubui icon:preview  # Generate preview HTML only
-npx nubui icon:clean    # Remove generated files
-npx nubui --help        # Show all commands
+npx nubui build    # Generate masks + preview and open browser (recommended)
 ```
 
-### icon:build & icon:masks Options
+### Individual Commands (for fine-grained control)
 
 ```bash
-npx nubui icon:build [OPTIONS]
+npx nubui icon:masks    # Generate icon mask CSS utilities only
+npx nubui icon:preview  # Generate icon preview HTML only
+npx nubui icon:clean    # Remove generated icon files
+npx nubui --help        # Show all available commands
+```
+
+### build & icon:masks Options
+
+```bash
+npx nubui build [OPTIONS]
 npx nubui icon:masks [OPTIONS]
 
 OPTIONS:
@@ -67,10 +74,10 @@ OPTIONS:
 
 EXAMPLES:
   # Generate CSS format (default)
-  npx nubui icon:build
+  npx nubui build
 
   # Generate SCSS format
-  npx nubui icon:build --format scss --output ./src/assets/scss/_icon-masks.scss
+  npx nubui build --format scss --output ./src/assets/scss/_icon-masks.scss
 ```
 
 ## Development Workflow
@@ -82,7 +89,7 @@ See **Quick Start** above for basic setup. For detailed integration with your bu
 The default CSS format works great with any build system that supports CSS imports:
 
 ```bash
-npx nubui icon:build
+npx nubui build
 # Generates: src/assets/css/icon-masks.css
 ```
 
@@ -97,7 +104,7 @@ Import in your main CSS file:
 If your project uses SCSS, generate in SCSS format:
 
 ```bash
-npx nubui icon:build --format scss --output ./src/assets/scss/_icon-masks.scss
+npx nubui build --format scss --output ./src/assets/scss/_icon-masks.scss
 ```
 
 Import in your main SCSS file:
@@ -111,7 +118,7 @@ Import in your main SCSS file:
 By default, nubui looks for SVG files in `src/assets/icon/`. You can customize this:
 
 ```bash
-npx nubui icon:build --icon-dir ./my-custom-icons
+npx nubui build --icon-dir ./my-custom-icons
 ```
 
 ## Framework Integration
