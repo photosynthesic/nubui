@@ -150,6 +150,70 @@ function loadIconData(
 }
 
 /**
+ * Mask positioning properties, in the order they are emitted.
+ */
+const MASK_POSITION_PROPERTIES: ReadonlyArray<readonly [string, string]> = [
+  ["mask-size", "contain"],
+  ["mask-repeat", "no-repeat"],
+  ["mask-position", "center"],
+];
+
+/**
+ * Render the mask declarations shared by every generated rule, `-webkit-` twin
+ * first.
+ *
+ * WebKit before Safari 15.4 (iOS Safari included) only implements the prefixed
+ * mask properties. Emitting the unprefixed form alone does not degrade to "no
+ * icon" there: the `mask-image` declaration is dropped while the neighbouring
+ * `background-color: currentColor` survives, so the element paints as a solid
+ * box in the icon's color.
+ */
+function maskBaseDeclarations(indent: string): string {
+  const lines = MASK_POSITION_PROPERTIES.flatMap(([property, value]) => [
+    `${indent}-webkit-${property}: ${value};`,
+    `${indent}${property}: ${value};`,
+  ]);
+  lines.push(`${indent}background-color: currentColor;`);
+  return lines.join("\n");
+}
+
+/**
+ * Render a `mask-image` pair, `-webkit-` twin first. `url` is the full CSS
+ * value, so callers can pass a literal data URI or an SCSS interpolation.
+ */
+function maskImageDeclarations(indent: string, url: string): string {
+  return [
+    `${indent}-webkit-mask-image: ${url};`,
+    `${indent}mask-image: ${url};`,
+  ].join("\n");
+}
+
+/**
+ * Feature query matching only browsers that implement neither mask property.
+ * Shared by both output formats so the condition cannot drift between them.
+ */
+const MASK_UNSUPPORTED_QUERY =
+  "@supports not ((-webkit-mask-image: none) or (mask-image: none))";
+
+/**
+ * Build the fallback that neutralizes `background-color` where masks are
+ * unavailable, so the icon renders as nothing rather than as a solid block.
+ * Browsers too old to understand `@supports` skip it and keep the pre-existing
+ * behaviour.
+ */
+function maskFallbackRule(selectors: string[], indent: string): string {
+  const selectorList = selectors
+    .map((selector) => `${indent}${selector}`)
+    .join(",\n");
+
+  return `${MASK_UNSUPPORTED_QUERY} {
+${selectorList} {
+${indent}${indent}background-color: transparent;
+${indent}}
+}`;
+}
+
+/**
  * Generate CSS content with icon classes
  */
 function generateCssContent(
@@ -166,10 +230,7 @@ function generateCssContent(
 
 /* Base styles for mask icons */
 .mask-icon-base {
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  background-color: currentColor;
+${maskBaseDeclarations("  ")}
 }
 
 /* Icon mask classes */
@@ -178,11 +239,8 @@ function generateCssContent(
   // Generate icon classes
   for (const icon of iconData) {
     cssContent += `.mask-icon-${icon.name} {
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  background-color: currentColor;
-  mask-image: url("data:image/svg+xml;base64,${icon.base64}");
+${maskBaseDeclarations("  ")}
+${maskImageDeclarations("  ", `url("data:image/svg+xml;base64,${icon.base64}")`)}
 }
 
 `;
@@ -194,21 +252,15 @@ function generateCssContent(
 `;
     for (const icon of iconData) {
       cssContent += `.before\\:mask-icon-${icon.name}::before {
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  background-color: currentColor;
-  mask-image: url("data:image/svg+xml;base64,${icon.base64}");
+${maskBaseDeclarations("  ")}
+${maskImageDeclarations("  ", `url("data:image/svg+xml;base64,${icon.base64}")`)}
   content: '';
   display: inline-block;
 }
 
 .after\\:mask-icon-${icon.name}::after {
-  mask-size: contain;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  background-color: currentColor;
-  mask-image: url("data:image/svg+xml;base64,${icon.base64}");
+${maskBaseDeclarations("  ")}
+${maskImageDeclarations("  ", `url("data:image/svg+xml;base64,${icon.base64}")`)}
   content: '';
   display: inline-block;
 }
@@ -216,6 +268,27 @@ function generateCssContent(
 `;
     }
   }
+
+  // Neutralize the solid `background-color` where masks are unsupported. Must
+  // trail the rules above so it wins on source order.
+  const fallbackSelectors = [
+    ".mask-icon-base",
+    ...iconData.map((icon) => `.mask-icon-${icon.name}`),
+  ];
+  if (includePseudoElements) {
+    for (const icon of iconData) {
+      fallbackSelectors.push(
+        `.before\\:mask-icon-${icon.name}::before`,
+        `.after\\:mask-icon-${icon.name}::after`
+      );
+    }
+  }
+
+  cssContent += `/* Fallback for browsers without mask support: drop the fill so
+   the element renders as nothing rather than a solid block. */
+${maskFallbackRule(fallbackSelectors, "  ")}
+
+`;
 
   cssContent += `/* Usage examples:
  *
@@ -257,10 +330,14 @@ function generateScssContent(
 
 // Base mixin for all mask icons
 @mixin mask-icon-base {
-	mask-size: contain;
-	mask-repeat: no-repeat;
-	mask-position: center;
-	background-color: currentColor;
+${maskBaseDeclarations("\t")}
+
+	// Without mask support the fill above paints a solid block, so drop it and
+	// render nothing instead. Nested in the mixin so every \`@include\` site is
+	// covered — the generated classes below and hand-written rules alike.
+	${MASK_UNSUPPORTED_QUERY} {
+		background-color: transparent;
+	}
 }
 
 // Icon data map
@@ -272,7 +349,7 @@ ${iconMapEntries}
 @each $name, $data in $icon-masks {
 	.mask-icon-#{$name} {
 		@include mask-icon-base;
-		mask-image: url("data:image/svg+xml;base64,#{$data}");
+${maskImageDeclarations("\t\t", 'url("data:image/svg+xml;base64,#{$data}")')}
 	}
 }
 ${
@@ -282,14 +359,14 @@ ${
 @each $name, $data in $icon-masks {
 	.before\\:mask-icon-#{$name}::before {
 		@include mask-icon-base;
-		mask-image: url("data:image/svg+xml;base64,#{$data}");
+${maskImageDeclarations("\t\t", 'url("data:image/svg+xml;base64,#{$data}")')}
 		content: '';
 		display: inline-block;
 	}
 
 	.after\\:mask-icon-#{$name}::after {
 		@include mask-icon-base;
-		mask-image: url("data:image/svg+xml;base64,#{$data}");
+${maskImageDeclarations("\t\t", 'url("data:image/svg+xml;base64,#{$data}")')}
 		content: '';
 		display: inline-block;
 	}

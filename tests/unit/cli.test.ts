@@ -53,6 +53,20 @@ describe("Nubui CLI", () => {
       const scssDir = path.join(tempDir, path.dirname(DEFAULT_SCSS_OUTPUT_PATH));
       expect(fs.existsSync(scssDir)).toBe(true);
     });
+
+    it("should emit -webkit- prefixed mask properties", () => {
+      execSync(`node "${binPath}" icon:masks`, { cwd: tempDir });
+
+      const outputPath = path.join(tempDir, DEFAULT_SCSS_OUTPUT_PATH);
+      const content = fs.readFileSync(outputPath, "utf-8");
+
+      // Safari before 15.4 only implements the prefixed properties.
+      expect(content).toContain("-webkit-mask-size: contain;");
+      expect(content).toContain("-webkit-mask-image: url");
+      expect(content).toContain(
+        "@supports not ((-webkit-mask-image: none) or (mask-image: none))"
+      );
+    });
   });
 
   describe("icon:preview", () => {
