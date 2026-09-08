@@ -233,4 +233,100 @@ describe("Icon Mask Generator", () => {
       expect(fs.existsSync(nestedOutputPath)).toBe(true);
     });
   });
+
+  describe("Browser compatibility", () => {
+    // WebKit before Safari 15.4 only implements the prefixed mask properties.
+    // Without the twins, `mask-image` is dropped while `background-color:
+    // currentColor` survives and the icon paints as a solid box.
+    const generate = (format: "css" | "scss", includePseudoElements = true) => {
+      fs.writeFileSync(path.join(tempIconDir, "test-icon.svg"), simpleSvg);
+
+      const outputPath = path.join(tempDir, `icon-masks.${format}`);
+      generateIconMasks({
+        iconDir: tempIconDir,
+        outputPath,
+        includePseudoElements,
+        format,
+      });
+
+      return fs.readFileSync(outputPath, "utf8");
+    };
+
+    it("should emit -webkit- twins for every mask property in CSS", () => {
+      const css = generate("css");
+
+      expect(css).toContain("-webkit-mask-size: contain;");
+      expect(css).toContain("-webkit-mask-repeat: no-repeat;");
+      expect(css).toContain("-webkit-mask-position: center;");
+      expect(css).toContain("-webkit-mask-image: url");
+
+      // The twin is an addition, not a swap — the unprefixed form must stay.
+      expect(css).toContain("\n  mask-image: url");
+    });
+
+    it("should emit -webkit- twins for every mask property in SCSS", () => {
+      const scss = generate("scss");
+
+      expect(scss).toContain("-webkit-mask-size: contain;");
+      expect(scss).toContain("-webkit-mask-repeat: no-repeat;");
+      expect(scss).toContain("-webkit-mask-position: center;");
+      expect(scss).toContain("-webkit-mask-image: url");
+      expect(scss).toContain("\n\t\tmask-image: url");
+    });
+
+    it("should prefix the pseudo-element variants too", () => {
+      const css = generate("css");
+
+      const beforeRule = css.slice(
+        css.indexOf(".before\\:mask-icon-test-icon::before"),
+        css.indexOf(".after\\:mask-icon-test-icon::after")
+      );
+      expect(beforeRule).toContain("-webkit-mask-image: url");
+    });
+
+    it("should drop the background fill where masks are unsupported", () => {
+      const css = generate("css");
+
+      expect(css).toContain(
+        "@supports not ((-webkit-mask-image: none) or (mask-image: none))"
+      );
+      expect(css).toContain("background-color: transparent;");
+
+      // The fallback only wins on source order, so it has to come last.
+      expect(css.indexOf("@supports not")).toBeGreaterThan(
+        css.lastIndexOf("background-color: currentColor;")
+      );
+    });
+
+    it("should cover pseudo-element variants in the fallback when enabled", () => {
+      const css = generate("css", true);
+      const fallback = css.slice(css.indexOf("@supports not"));
+
+      expect(fallback).toContain(".before\\:mask-icon-test-icon::before");
+      expect(fallback).toContain(".after\\:mask-icon-test-icon::after");
+    });
+
+    it("should keep the fallback free of pseudo-elements when disabled", () => {
+      const css = generate("css", false);
+
+      expect(css).toContain("@supports not");
+      expect(css).not.toContain("::before");
+      expect(css).not.toContain("::after");
+    });
+
+    it("should nest the SCSS fallback in the mixin so @include sites are covered", () => {
+      const scss = generate("scss");
+      const mixin = scss.slice(
+        scss.indexOf("@mixin mask-icon-base"),
+        scss.indexOf("$icon-masks:")
+      );
+
+      // A hand-written `@include mask-icon-base` rule cannot be enumerated in a
+      // selector list, so the fallback has to travel with the mixin.
+      expect(mixin).toContain(
+        "@supports not ((-webkit-mask-image: none) or (mask-image: none))"
+      );
+      expect(mixin).toContain("background-color: transparent;");
+    });
+  });
 });

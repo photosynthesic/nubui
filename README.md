@@ -182,14 +182,14 @@ nubui supports three ways to use your icons. You can explore each mode interacti
 
 **Browser Support:**
 
-Uses CSS `mask-image` which is supported in all modern browsers:
+Uses CSS `mask-image`, emitted alongside its `-webkit-` twin so older WebKit is covered as well:
 
 - Chrome 55+ (2016)
 - Firefox 53+ (2017)
-- Safari 15.4+ (2022)
+- Safari 15.4+ (2022) unprefixed, older versions via `-webkit-mask-image`
 - Edge 79+ (2020)
 
-**Note:** Ancient browsers (IE 11, Safari <15.4) are not supported. If you need to support older browsers, use Inline SVG or IMG Mode instead.
+**Note:** Where neither mask property exists but `@supports` does (Firefox before 53, for instance), a feature query clears the icon's `background-color` so nothing is painted — without it the element would show as a solid block in the icon's color. Browsers that don't understand `@supports` either (IE 11) skip that fallback and still show the block, so use Inline SVG or IMG Mode for those.
 
 ### 2. Inline Mode
 
